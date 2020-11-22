@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Arrays;
+
 public class Request {
 	private int requestId;
 	
@@ -16,5 +18,17 @@ public class Request {
 	
 	public Request(int i) {
 		this.requestId = i;
+	}
+	
+	public String requestedItemsToString() {
+		return Arrays.toString(this.amountsRequested);
+	}
+	
+	public String shippingDaysToString() {
+		return Arrays.toString(shippingDays);
+	}
+	
+	public int getId() {
+		return this.requestId;
 	}
 }

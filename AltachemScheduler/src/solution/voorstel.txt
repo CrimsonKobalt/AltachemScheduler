@@ -1,0 +1,23 @@
+%chris
+
+voorstel:
+
+	-> Stel het model op adhv periode, dagen,...
+	-> geef elke dag de relevante beslissingsvariabelen
+	
+	-> probeer een "oplossing" op te stellen adhv de beslissingsvariabelen
+	
+	-> als er constraints niet gerespecteerd worden exception out & probeer iets anders
+	-> stel de objective function op adhv de "oplossing"
+	
+	-> wisselen is dan simpelweg ergens 1 beslissingsvariabele wisselen: dit kunnen we randomisen.
+	
+	-> groot probleem: hoe stellen we (vertrekkend van de beslissingsvariabelen) een 'oplossing' op?
+	
+dit lijkt wat op de manier waarop dat TSP-verhaal werd opgelost:
+	de beslissingen daar waren de volgorde waarin steden bezocht werden
+	hier is het eigenlijk de volgorde waarin we proberen requests af te handelen, neen?
+		of is het eerder de volgorde waarin we items zo efficient mogelijk produceren?
+		
+		we zouden kunnen de volgorde van requests randomisen, dan berekenen hoeveel items minstens op bepaalde dagen moeten (in totaal) geproduceerd zijn (dit lukt wel denk ik?)
+		en dan zo kijken om de machines zo efficient mogelijk die items te laten produceren in de volgorde waarin ze nodig zijn.

@@ -3,6 +3,7 @@ package model;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
+import java.util.stream.IntStream;
 
 public class Problem {
 	private String outputfile;
@@ -66,7 +67,7 @@ public class Problem {
             this.requests = new Request[Integer.parseInt(sc.nextLine().substring(20))];
             //init requests
             for(int i=0; i<requests.length; i++) {
-            	this.requests[i] = new Request(i+1);
+            	this.requests[i] = new Request(i);
             }
             
             //number of blocks per day
@@ -127,6 +128,10 @@ public class Problem {
                     this.machineEfficiencies[i][j] = Integer.parseInt(machineEfficientiesData[j]);
                 }
             }
+            //fix it so that machines get this info
+            for( int i=0; i<this.machines.length; i++) {
+            	this.machines[i].setItemEfficiencies(Problem.getColumn(machineEfficiencies, i+1));
+            }
             
             //fix isLargeChangeover[][]
             String infoDescription = sc.nextLine();
@@ -173,5 +178,38 @@ public class Problem {
 			System.err.println("File \"" + filename + "\" not found.");
 			e.printStackTrace();
 		}
+	}
+	
+	public void printRequestedItems() {
+		for(Request r: this.requests) {
+			System.out.print("Request " + r.getId() +": ");
+			System.out.println(r.requestedItemsToString());
+		}
+	}
+	
+	public void printShippingDays() {
+		for(Request r: this.requests) {
+			System.out.print("Request " + r.getId() +": ");
+			System.out.println(r.shippingDaysToString());
+		}
+	}
+	
+	public void printMachineInputs() {
+		for(Machine m: this.machines) {
+			System.out.print("Machine " + m.getMachineId() +": ");
+			System.out.println(m.getValuesInString());
+		}
+	}
+	
+	public void printItemEfficiencies() {
+		for(Machine m: this.machines) {
+			System.out.print("Machine " + m.getMachineId() +": ");
+			System.out.println(m.getItemEfficienciesInString());
+		}
+	}
+	
+	public static int[] getColumn(int[][] matrix, int column) {
+	    return IntStream.range(0, matrix.length)
+	        .map(i -> matrix[i][column]).toArray();
 	}
 }
