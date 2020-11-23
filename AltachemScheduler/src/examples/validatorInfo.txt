@@ -1,0 +1,32 @@
+The validator for the Altachem Scheduling Problem (ASP) is written in Java. It requires (at least) Java 11 to run.
+
+Given an instance file "instance.txt" and a solution file for this instance "solution.txt", you may run the validator by using the command:
+
+java -jar AspValidator.jar -i instance.txt -s solution.txt
+
+Parameters are:
+
+-i : (required) the path to the instance file
+
+-s : (required) the path to the solution file
+
+-l : (optional) a path to a file where the output will be written to
+
+Example. Running for the toy instance with solution "toy_sol_c420.txt" using the command:
+
+java -jar AspValidator.jar -i toy_inst.txt -s toy_sol_c420.txt
+
+The ouput is:
+
+Result: VALID
+Instance: toy_inst
+Solution cost: 420.0
+
+No errors found
+
+
+Should there be any problems with the solution file, messages reporting the errors will be printed out instead of "No errors found", whereas the result part will be "Result: INVALID".
+
+NOTE 1: The validator expects a solution file in the format described in the "Problem Description" PDF. A file format that deviates from this definition incurs "undefined behavior" for the validator (including null pointer exceptions). Please, format the solution files accordingly. For an example, see the solution files provided for the toy instance.
+
+NOTE 2:  Any bug or problem you may find in the validator, please let us know. You can send an e-mail to: carlo.sartori@kuleuven.be , vinicius.gandramartinssantos@kuleuven.be, pieter.smet@kuleuven.be and hatice.calik@kuleuven.be
