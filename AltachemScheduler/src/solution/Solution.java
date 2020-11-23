@@ -18,7 +18,7 @@ public class Solution {
 	
 	//lijst met volgorde van items die we produceren + hoe veel blokken we dit doen
 	//orderPerMachine.get(i) is de volgorde voor machine i;
-	List<List<ProductionOrder>> orderPerMachine;
+	List<List<Item>> orderPerMachine;
 	
 	public static Solution CreateInitialSolution(Problem problem) {
 		Solution solution = new Solution();
@@ -28,12 +28,12 @@ public class Solution {
 		solution.horizon = new Day[problem.getHorizon()];
 		
 		//no production scheduled
-		solution.orderPerMachine = new ArrayList<List<ProductionOrder>>();
+		solution.orderPerMachine = new ArrayList<List<Item>>();
 		for(Machine m: problem.getMachines()) {
-			solution.orderPerMachine.add(new ArrayList<ProductionOrder>());
+			solution.orderPerMachine.add(new ArrayList<Item>());
 		}
 		
-		//convert this initial solution to a feasible solution.
+		//convert this initial solution to a feasible schedule.
 		solution.scheduleMaintenances(problem);
 		
 		//fix the nightshifts: == minAmountofConsecutiveNightShifts - amountOfPreviousNightShifts
@@ -44,18 +44,40 @@ public class Solution {
 			}
 		}
 		
-		//set stock for all days == history stock
-		/*
-		int[] stockHistory = new int[problem.getItems().length];
-		for(int i=0; i<stockHistory.length; i++) {
-			stockHistory[i] = solution.problem.getItems()[i].getQuantityInStock();
-		}
-		for(Day d: solution.horizon) {
-			d.setStock(stockHistory);
-		}
-		*/
-		
 		return solution;
+	}
+	
+	public Solution() {
+		//STUB
+	}
+	
+	/** copy constructor to be used when creating a new solution for the algorithm (local search)
+	 * @param solution old solution
+	 */
+	public Solution(Solution solution) {
+		//link the problem
+		this.problem = solution.problem;
+		//define the horizon
+		this.horizon = new Day[solution.horizon.length];
+		
+		//remember the previously decided order of items to be produced (block per block)
+		this.orderPerMachine = new ArrayList<List<Item>>();
+		for(List<Item> itemlist: solution.orderPerMachine) {
+			this.orderPerMachine.add(new ArrayList<Item>());
+			for(Item item : itemlist) {
+				this.orderPerMachine.get(this.orderPerMachine.size()-1).add(item);
+			}
+		}
+		
+		//schedule the maintenances...
+		solution.scheduleMaintenances(problem);
+		
+		//remember the decisions previously made: these can now potentially be changed.
+		for(int i=0; i<this.horizon.length; i++) {
+			this.horizon[i].nachtshift = solution.horizon[i].nachtshift;
+			this.horizon[i].overtime = solution.horizon[i].overtime;
+			this.horizon[i].parallelwerk = solution.horizon[i].parallelwerk;
+		}
 	}
 	
 	public void scheduleMaintenances(Problem problem) {
