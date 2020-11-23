@@ -2,6 +2,7 @@ package runnables;
 
 import examples.Reader;
 import model.Problem;
+import solution.Solution;
 
 public class Test {
 
@@ -18,6 +19,8 @@ public class Test {
 		problem.printMachineInputs();
 		System.out.println();
 		problem.printItemEfficiencies();
+		
+		Solution solution = Solution.CreateInitialSolution(problem);
 	}
 
 }

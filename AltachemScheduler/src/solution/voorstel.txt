@@ -21,5 +21,22 @@ dit lijkt wat op de manier waarop dat TSP-verhaal werd opgelost:
 		
 		we zouden kunnen de volgorde van requests randomisen, dan berekenen hoeveel items minstens op bepaalde dagen moeten (in totaal) geproduceerd zijn (dit lukt wel denk ik?)
 		en dan zo kijken om de machines zo efficient mogelijk die items te laten produceren in de volgorde waarin ze nodig zijn.
-
 		
+--------------------------------------------------------------------------------------------------------------------------------------
+
+1) schedule maintenance (cfr Hatice: geldt dit als een initiele oplossing?)
+	
+2) schedule blokken willekeurig & exception out als fout bij check? klinkt slecht
+3) pak de laatste dag van een request wanneer die shipped kan worden & tel alle items op die ervoor nodig zijn.
+
+	nu kunnen we gewoon switchen in nachtshifts/overtime/parallelwerk?
+	
+4) wissel de changeovers en pas productie aan naar gelang?
+	wat met verschillende durations van changeovers?
+	
+	V/A machines: volgorde waarin items worden geproduceerd + hoeveel blokken dat je ze produceert? (+maintenance)
+		meegeven van boolean maintenance aan Day als beslissing die je kan wisselen? hier moet wel de limiet gerespecteerd worden.
+		
+		1,3
+		2,7
+		1,4

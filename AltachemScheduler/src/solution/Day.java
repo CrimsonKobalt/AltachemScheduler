@@ -3,16 +3,65 @@ package solution;
 import java.util.List;
 
 public class Day {
-	//Jobs[i][j] : de job die uitgevoegd wordt door machine i op tijdstip j;
+	// Jobs[i][j] : de job die uitgevoegd wordt door machine i op tijdstip j;
 	Job[][] jobs;
-	
-	//machinestates[i][j] = k; machine i in toestand is om k te produceren in block j
-	int[][] machinestates;
-	
-	int daysSinceLastMaintenance;
-	
+
 	boolean parallelwerk;
 	boolean nachtshift;
-	
 	int overtime;
+	
+	static int[] lastMaintenanceDayIndex = null;
+
+	public Day(int aantalMachines, int aantalBlokkenPerDag) {
+		jobs = new Job[aantalMachines][aantalBlokkenPerDag];
+		for(int i=0; i<aantalMachines; i++) {
+			for(int j=0; j<aantalBlokkenPerDag; j++) {
+				jobs[i][j] = new Idle();
+			}
+		}
+		
+		this.parallelwerk = false;
+		this.nachtshift = false;
+		this.overtime = 0;
+	}
+
+	public Job[][] getJobs() {
+		return jobs;
+	}
+
+	public void setJobs(Job[][] jobs) {
+		this.jobs = jobs;
+	}
+
+	public boolean isParallelwerk() {
+		return parallelwerk;
+	}
+
+	public void setParallelwerk(boolean parallelwerk) {
+		this.parallelwerk = parallelwerk;
+	}
+
+	public boolean isNachtshift() {
+		return nachtshift;
+	}
+
+	public void setNachtshift(boolean nachtshift) {
+		this.nachtshift = nachtshift;
+	}
+
+	public int getOvertime() {
+		return overtime;
+	}
+
+	public void setOvertime(int overtime) {
+		this.overtime = overtime;
+	}
+
+	public static int[] getLastMaintenanceDays() {
+		return Day.lastMaintenanceDayIndex;
+	}
+	
+	public static void setLastMaintenanceDays(int[] indices) {
+		Day.lastMaintenanceDayIndex = indices;
+	}
 }

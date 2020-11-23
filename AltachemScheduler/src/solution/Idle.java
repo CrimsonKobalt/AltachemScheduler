@@ -8,7 +8,7 @@ public class Idle extends Job {
 
 	@Override
 	public String toString() {
-		return "Idle";
+		return "IDLE";
 	}
 
 }
