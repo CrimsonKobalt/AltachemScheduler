@@ -174,8 +174,6 @@ public class Problem {
 				}
 				this.requests[i].setAmountsRequested(requestedItems[i]);
 			}
-
-			System.out.println("Problem read from file.");
 		} catch (FileNotFoundException e) {
 			System.err.println("File \"" + filename + "\" not found.");
 			e.printStackTrace();
