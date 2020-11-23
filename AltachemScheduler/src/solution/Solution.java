@@ -110,12 +110,14 @@ public class Solution {
 		return scheduleMaintenance(horizon, machineIndex, dayIndex-1, duration, techStart, techStop);
 	}
 	
+	//calls the calculateStock() function: this recalculates the stock levels. If this is unwanted, please remove.
 	private double evaluate() {
 		this.calculateStock();
 		Evaluation evaluation = new Evaluation(this.problem);
 		return evaluation.calculateObjectiveFunction(this);
 	}
 	
+	//can be ignored if stock is kept another way.
 	private void calculateStock() {
 		//get stock from history
 		int[] stockHistory = new int[problem.getItems().length];
