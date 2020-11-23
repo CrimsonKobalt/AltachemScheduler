@@ -74,6 +74,8 @@ public class Day {
 			}
 			sb.append("\n");
 		}
+		sb.append("#Shipped request ids\n");
+		sb.append("-1\n");
 		sb.append("#Night shift\n");
 		if(this.nachtshift) {
 			sb.append("1\n");

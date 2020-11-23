@@ -101,10 +101,15 @@ public class Solution {
 	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
+		sb.append("Instance_name: ");
+		sb.append(this.problem.getInstanceName());
+		sb.append("\n");
+		sb.append("Cost: ");
+		sb.append(Evaluation.calculateObjectiveFunction(this));
+		sb.append("\n");
 		for(int i=0; i<horizon.length; i++) {
-			sb.append("DAY " + i + ":\n");
+			sb.append("#Day " + i + ":\n");
 			sb.append(horizon[i]);
-			sb.append("\n");
 		}
 		return sb.toString();
 	}
