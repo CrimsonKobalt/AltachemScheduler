@@ -64,4 +64,15 @@ public class Day {
 	public static void setLastMaintenanceDays(int[] indices) {
 		Day.lastMaintenanceDayIndex = indices;
 	}
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		for(int b=0;b<jobs[0].length;b++) {
+			sb.append(b);
+			for(int m=0;m<jobs.length;m++) {
+				sb.append(";" + jobs[m][b]);				
+			}
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
 }
