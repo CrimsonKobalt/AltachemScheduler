@@ -5,6 +5,7 @@ import model.Problem;
 import solution.Idle;
 import solution.Job;
 import solution.Maintenance;
+import solution.Production;
 import solution.Solution;
 
 public class Test {

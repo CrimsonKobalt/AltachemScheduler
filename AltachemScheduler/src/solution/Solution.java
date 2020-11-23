@@ -45,6 +45,7 @@ public class Solution {
 		}
 		
 		//set stock for all days == history stock
+		/*
 		int[] stockHistory = new int[problem.getItems().length];
 		for(int i=0; i<stockHistory.length; i++) {
 			stockHistory[i] = solution.problem.getItems()[i].getQuantityInStock();
@@ -52,6 +53,7 @@ public class Solution {
 		for(Day d: solution.horizon) {
 			d.setStock(stockHistory);
 		}
+		*/
 		
 		return solution;
 	}
@@ -108,9 +110,53 @@ public class Solution {
 		return scheduleMaintenance(horizon, machineIndex, dayIndex-1, duration, techStart, techStop);
 	}
 	
-	public double evaluate() {
+	private double evaluate() {
+		this.calculateStock();
 		Evaluation evaluation = new Evaluation(this.problem);
 		return evaluation.calculateObjectiveFunction(this);
+	}
+	
+	private void calculateStock() {
+		//get stock from history
+		int[] stockHistory = new int[problem.getItems().length];
+		for(int i=0; i<stockHistory.length; i++) {
+			stockHistory[i] = this.problem.getItems()[i].getQuantityInStock();
+		}
+		//recursive function to fix stock
+		this.calculateStock(0, stockHistory);
+	}
+	
+	//start this off with dayIndex == 0 and previousStockLevels as the int[] history (as received in input)
+	private void calculateStock(int dayIndex, int[] previousStockLevels) {
+		Day thisDay = this.horizon[dayIndex];
+		//stock starts off with the same level as previous day
+		for(int i=0; i<thisDay.stock.length; i++) {
+			thisDay.stock[i] = previousStockLevels[i];
+		}
+		//add the production of each item to the respective stock level
+		for(Item item: this.problem.getItems()) {
+			Production forItem = new Production(item.getItemId());
+			//add all production for that item
+			for(int i=0; i<thisDay.jobs.length; i++) {
+				for(int j=0; j<thisDay.jobs[0].length; j++) {
+					if(thisDay.jobs[i][j].equals(forItem)) {
+						//the machine produces this many items in 1 block of production, so add that.
+						thisDay.stock[item.getItemId()] += this.problem.getMachines()[i].getItemEfficiencies()[item.getItemId()];
+					}
+				}
+			}
+		}
+		//subtract the shipped amounts (if any)
+		for(Request r: thisDay.shippedToday) {
+			for(int i=0; i<r.getAmountsRequested().length; i++) {
+				thisDay.stock[i] -= r.getAmountsRequested()[i];
+				assert thisDay.stock[i] >= 0 : "stock for item " + i + " under 0";
+				assert thisDay.stock[i] <= this.problem.getItems()[i].getMaxAllowedInStock() : "stock for item " + i + " over allowed level: " +thisDay.stock[i];
+			}
+		}
+		//end
+		if(dayIndex == this.horizon.length - 1) return;
+		calculateStock(dayIndex + 1, thisDay.stock);
 	}
 	
 	public String toString() {
