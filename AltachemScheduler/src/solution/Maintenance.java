@@ -8,8 +8,11 @@ public class Maintenance extends Job {
 
 	@Override
 	public String toString() {
-		return "Maintenance";
+		return "M";
 	}
 	
-	
+	@Override
+	public boolean equals(Job job) {
+		return this.getClass().equals(job.getClass());
+	}
 }

@@ -64,6 +64,7 @@ public class Day {
 	public static void setLastMaintenanceDays(int[] indices) {
 		Day.lastMaintenanceDayIndex = indices;
 	}
+	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		for(int b=0;b<jobs[0].length;b++) {
@@ -72,6 +73,12 @@ public class Day {
 				sb.append(";" + jobs[m][b]);				
 			}
 			sb.append("\n");
+		}
+		sb.append("#Night shift\n");
+		if(this.nachtshift) {
+			sb.append("1\n");
+		} else {
+			sb.append("0\n");
 		}
 		return sb.toString();
 	}

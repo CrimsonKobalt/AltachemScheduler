@@ -10,5 +10,10 @@ public class Idle extends Job {
 	public String toString() {
 		return "IDLE";
 	}
+	
+	@Override
+	public boolean equals(Job job) {
+		return this.getClass().equals(job.getClass());
+	}
 
 }
