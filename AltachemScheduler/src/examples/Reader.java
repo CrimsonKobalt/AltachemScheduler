@@ -1,8 +1,8 @@
 package examples;
 
-import model.Item;
 import model.Machine;
 import model.Problem;
+import solution.Item;
 
 import java.io.File;
 import java.io.FileNotFoundException;

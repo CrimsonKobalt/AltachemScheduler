@@ -7,7 +7,7 @@ voorstel:
 	
 	-> probeer een "oplossing" op te stellen adhv de beslissingsvariabelen
 	
-	-> als er constraints niet gerespecteerd worden exception out & probeer iets anders
+	-> als er constraints niet gerespecteerd (kunnen) worden exception out & probeer iets anders
 	-> stel de objective function op adhv de "oplossing"
 	
 	-> wisselen is dan simpelweg ergens 1 beslissingsvariabele wisselen: dit kunnen we randomisen.
@@ -21,3 +21,5 @@ dit lijkt wat op de manier waarop dat TSP-verhaal werd opgelost:
 		
 		we zouden kunnen de volgorde van requests randomisen, dan berekenen hoeveel items minstens op bepaalde dagen moeten (in totaal) geproduceerd zijn (dit lukt wel denk ik?)
 		en dan zo kijken om de machines zo efficient mogelijk die items te laten produceren in de volgorde waarin ze nodig zijn.
+
+		

@@ -1,4 +1,4 @@
-package model;
+package solution;
 
 public class Production extends Job {
 	private int itemId;

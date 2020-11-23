@@ -1,4 +1,4 @@
-package model;
+package solution;
 
 public class Changeover extends Job {
 	private int fromItemId;

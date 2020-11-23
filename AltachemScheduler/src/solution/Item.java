@@ -1,4 +1,4 @@
-package model;
+package solution;
 
 public class Item {
 	private int itemId;

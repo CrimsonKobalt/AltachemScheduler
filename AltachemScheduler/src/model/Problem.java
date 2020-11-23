@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 import java.util.stream.IntStream;
 
+import solution.Item;
+
 public class Problem {
 	private String outputfile;
 	private String instanceName;

@@ -1,4 +1,4 @@
-package model;
+package solution;
 
 public abstract class Job {
 	
