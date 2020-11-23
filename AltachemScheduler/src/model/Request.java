@@ -20,6 +20,10 @@ public class Request {
 		this.requestId = i;
 	}
 	
+	public int[] getAmountsRequested() {
+		return this.amountsRequested;
+	}
+	
 	public String requestedItemsToString() {
 		return Arrays.toString(this.amountsRequested);
 	}

@@ -44,13 +44,22 @@ public class Solution {
 			}
 		}
 		
+		//set stock for all days == history stock
+		int[] stockHistory = new int[problem.getItems().length];
+		for(int i=0; i<stockHistory.length; i++) {
+			stockHistory[i] = solution.problem.getItems()[i].getQuantityInStock();
+		}
+		for(Day d: solution.horizon) {
+			d.setStock(stockHistory);
+		}
+		
 		return solution;
 	}
 	
 	public void scheduleMaintenances(Problem problem) {
 		
 		for(int i=0; i<horizon.length; i++) {
-			horizon[i] = new Day(problem.amountOfMachines(), problem.getBlocksPerDay());
+			horizon[i] = new Day(problem.amountOfMachines(), problem.getBlocksPerDay(), problem.getItems().length);
 		}
 		
 		int[] lastMaintenanceIndices = new int[problem.amountOfMachines()];
@@ -99,13 +108,18 @@ public class Solution {
 		return scheduleMaintenance(horizon, machineIndex, dayIndex-1, duration, techStart, techStop);
 	}
 	
+	public double evaluate() {
+		Evaluation evaluation = new Evaluation(this.problem);
+		return evaluation.calculateObjectiveFunction(this);
+	}
+	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Instance_name: ");
 		sb.append(this.problem.getInstanceName());
 		sb.append("\n");
 		sb.append("Cost: ");
-		sb.append(Evaluation.calculateObjectiveFunction(this));
+		sb.append(this.evaluate());
 		sb.append("\n");
 		for(int i=0; i<horizon.length; i++) {
 			sb.append("#Day " + i + ":\n");
