@@ -40,3 +40,43 @@ dit lijkt wat op de manier waarop dat TSP-verhaal werd opgelost:
 		1,3
 		2,7
 		1,4
+		
+--------------------------------------------------------------------------------------------------------------------------------------
+%Brecht
+
+Voorstel move-operator:
+
+
+- Vertrek vanuit model met maintenances zonder overtime/nightshift/parallel
+
+- Geef een random volgorde van items
+
+- Produceer elk item tot stopwaarde(bv. het minimum van max_stocklvl en som van alle units per request + minimum_stocklvl, 
+																		of als technician nodig is voor next changeover)
+		doe dit in de meegegeven volgorde en neem telkens machine met hoogste effinciency voor dit item
+		na elk item geproduced, nieuwe changeover
+		
+- Evalueer per dag of er penalties zijn(requests niet gehaald/ onder min_stock...)
+		probeer deze op te lossen door parallelwerk, overtime, nightshift(geef nightshift aan volgende dagen ook), 
+									  parallelwerk met overtime, parallelwerk met nightshift -> neem solution met laagste evaluatie
+
+- Doe opnieuw met andere volgorde van items
+
+
+- 
+- 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
