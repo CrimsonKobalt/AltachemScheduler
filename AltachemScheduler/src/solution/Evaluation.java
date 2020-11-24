@@ -23,7 +23,7 @@ public class Evaluation {
 			//add night shift cost
 			if(d.nachtshift) result += this.nightshiftCost;
 			//add parallel cost
-			if(d.parallelwerk) result += this.nightshiftCost;
+			if(d.parallelwerk) result += this.parallelCost;
 			//add overtime cost
 			if(d.overtime > 0) result += (d.overtime * this.overtimeBlockCost);
 			//add stock cost
