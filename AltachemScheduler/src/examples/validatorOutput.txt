@@ -1,0 +1,5 @@
+Result: VALID
+Instance: A_40_100_60.txt
+Solution cost: 2205277.91
+
+No errors found

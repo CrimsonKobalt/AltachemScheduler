@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import model.Item;
 import model.Machine;
@@ -190,7 +191,7 @@ public class Solution {
 	public void write(String filename) {
 		try {
 			FileWriter fileWriter = new FileWriter(filename);
-			fileWriter.write(toString());
+			fileWriter.write(this.toString());
 			fileWriter.close();
 		} catch (IOException e) {
 			System.out.println("An error occurred.");
@@ -205,7 +206,7 @@ public class Solution {
 		sb.append(this.problem.getInstanceName());
 		sb.append("\n");
 		sb.append("Cost: ");
-		sb.append(this.evaluate());
+		sb.append(String.format(Locale.ENGLISH, "%.2f", this.evaluate()));
 		sb.append("\n");
 		for(int i=0; i<horizon.length; i++) {
 			sb.append("#Day " + i + "\n");

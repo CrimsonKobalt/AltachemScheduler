@@ -1,5 +1,5 @@
 Instance_name: A_20_15_60.txt
-Cost: 761968.8195000001
+Cost: 761968.82
 #Day 0
 0;IDLE;IDLE
 1;IDLE;IDLE

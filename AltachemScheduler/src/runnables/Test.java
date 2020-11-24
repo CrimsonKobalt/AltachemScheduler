@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Test {
+	
+	private static final String NEWLINE = System.getProperty("line.separator");
 
 	public static void main(String[] args) {
 
@@ -36,24 +38,8 @@ public class Test {
 
             // check with validator
             try{
-                    Process proc = Runtime.getRuntime().exec("java -jar src/examples/AspValidator.jar -i " + filename + " -s " + outputFilename + " -l src/examples/validatorOutput.txt");
-
-                    System.out.println("Validator Output for file: " + filename);
-
-                    // Read the output from the command
-                    BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-                    String s = null;
-                    while ((s = stdInput.readLine()) != null) {
-                            System.out.println(s);
-                    }
-
-                    // Read any errors from the attempted command
-                    BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-                    while ((s = stdError.readLine()) != null) {
-                            System.out.println(s);
-                    }
-
-                    System.out.println();
+                    System.out.println(run("java", "-jar", "src/examples/AspValidator.jar", "-i", filename, "-s", outputFilename));
+                    // + " -l src/examples/validatorOutput.txt"
 
             }catch (IOException ioException){
                     System.out.println("An error occurred.");
@@ -63,5 +49,24 @@ public class Test {
         }
 
 	}
+	
+	public static String run(String... command) throws IOException
+    {
+        ProcessBuilder pb = new ProcessBuilder(command).redirectErrorStream(true).directory(new File(System.getProperty("user.home") + "/git/AltachemSchedulerProposal/AltachemScheduler"));
+        System.out.println(pb.directory());
+        Process process = pb.start();
+        StringBuilder result = new StringBuilder(80);
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream())))
+        {
+            while (true)
+            {
+                String line = in.readLine();
+                if (line == null)
+                    break;
+                result.append(line).append(NEWLINE);
+            }
+        }
+        return result.toString();
+    }
 
 }
