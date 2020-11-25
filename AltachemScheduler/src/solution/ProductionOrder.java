@@ -2,12 +2,21 @@ package solution;
 
 public class ProductionOrder {
 	private int itemId;
+	private int machineId;
 	private int amountOfBlocks;
 
-	public ProductionOrder(int itemId, int amountOfBlocks) {
+	public ProductionOrder(int itemId, int machineId, int amountOfBlocks) {
 		super();
 		this.itemId = itemId;
+		this.machineId = machineId;
 		this.amountOfBlocks = amountOfBlocks;
+	}
+	
+	public ProductionOrder(ProductionOrder copy) {
+		super();
+		this.itemId = copy.itemId;
+		this.machineId = copy.machineId;
+		this.amountOfBlocks = copy.amountOfBlocks;
 	}
 
 	public int getItemId() {
@@ -26,9 +35,11 @@ public class ProductionOrder {
 		this.amountOfBlocks = amountOfBlocks;
 	}
 
-	@Override
-	public String toString() {
-		return "ProductionOrder [itemId=" + itemId + ", amountOfBlocks=" + amountOfBlocks + "]";
+	public int getMachineId() {
+		return this.itemId;
 	}
-
+	
+	public void setMachineId(int Id) {
+		this.machineId = Id;
+	}
 }

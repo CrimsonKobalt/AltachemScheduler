@@ -62,9 +62,32 @@ Voorstel move-operator:
 
 - Doe opnieuw met andere volgorde van items
 
+--------------------------------------------------------------------------------------------------------------------------------------
 
-- 
-- 
+ipv List<List<Item>> ofzoiets gebruiken we een List<MachineOrder>: met dus per entry het volgende:
+			
+				- op welke machine zetten we de order
+				- welk item produceren we
+			   (- hoeveel blokken produceren we dit? )
+			   
+Om nu vanuit deze List<MachineOrder> naar een schedule te gaan het volgende:
+
+				- voor elk item in deze list, zoek de eerst mogelijke positie om dit in het schema te zetten (met respect tot parallelwerk, overtime & nightshift)
+				- gaan we over de limiet van mogelijke slots, exception out (throw new ConfigurationException()) & neem deze oplossing NOOIT aan. (dit lukt wel hopelijk?)
+				
+Swaps zijn nu:
+				- overtime op een bepaalde dag? (0/1/2/3)
+				- parallelwerk op een bepaalde dag? (0/1)
+				- night shift gedurende een bepaalde periode?
+					- ja/neen
+					- verschuiven?
+					
+					--> hier moet de minimumperiode gerespecteerd worden alsook de carry-over
+					
+				- nieuwe (random) MachineOrder toevoegen
+				- verplaatsen van machine van een MachineOrder
+				- op een andere positie plaatsen in de lijst
+				- +1/-1 blokken productie?
 
 
 

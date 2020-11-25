@@ -7,28 +7,28 @@ import model.Problem;
 import model.Request;
 
 public class Evaluation {
-	private double nightshiftCost;
-	private double parallelCost;
-	private double overtimeBlockCost;
-	private double underStockPenaltyCost;
-	private double[] itemRevenue;
+	private static double nightshiftCost;
+	private static double parallelCost;
+	private static double overtimeBlockCost;
+	private static double underStockPenaltyCost;
+	private static double[] itemRevenue;
 	
-	private int[] minStock;
+	private static int[] minStock;
 	
-	public double calculateObjectiveFunction(Solution solution) {
+	public static double calculateObjectiveFunction(Solution solution) {
 		double result = 0;
 		List<Request> shippedRequests = new ArrayList<>();
 		
 		for(Day d: solution.horizon) {
 			//add night shift cost
-			if(d.nachtshift) result += this.nightshiftCost;
+			if(d.nachtshift) result += Evaluation.nightshiftCost;
 			//add parallel cost
-			if(d.parallelwerk) result += this.parallelCost;
+			if(d.parallelwerk) result += Evaluation.parallelCost;
 			//add overtime cost
-			if(d.overtime > 0) result += (d.overtime * this.overtimeBlockCost);
+			if(d.overtime > 0) result += (d.overtime * Evaluation.overtimeBlockCost);
 			//add stock cost
 			for(int i=0; i<d.stock.length; i++) {
-				if(d.stock[i] < minStock[i]) result += this.underStockPenaltyCost;
+				if(d.stock[i] < minStock[i]) result += Evaluation.underStockPenaltyCost;
 			}
 			//add requests to shippedRequests if they have been shipped
 			for(Request r : d.shippedToday) {
@@ -47,17 +47,17 @@ public class Evaluation {
 		return result;
 	}
 	
-	public Evaluation(Problem problem) {
-		this.nightshiftCost = problem.getCostOfNightShift();
-		this.parallelCost = problem.getCostOfParallelDay();
-		this.overtimeBlockCost = problem.getCostOfOvertimePerBlock();
-		this.underStockPenaltyCost = problem.getCostPerItemUnderMinimumStock();
+	public static void configureEvaluation(Problem problem) {
+		Evaluation.nightshiftCost = problem.getCostOfNightShift();
+		Evaluation.parallelCost = problem.getCostOfParallelDay();
+		Evaluation.overtimeBlockCost = problem.getCostOfOvertimePerBlock();
+		Evaluation.underStockPenaltyCost = problem.getCostPerItemUnderMinimumStock();
 		
-		this.itemRevenue = new double[problem.getItems().length];	
-		this.minStock = new int[problem.getItems().length];
+		Evaluation.itemRevenue = new double[problem.getItems().length];	
+		Evaluation.minStock = new int[problem.getItems().length];
 		for(int i=0; i<itemRevenue.length; i++) {
-			itemRevenue[i] = problem.getItems()[i].getCostPerItem();
-			minStock[i] = problem.getItems()[i].getMinAllowedInStock();
+			Evaluation.itemRevenue[i] = problem.getItems()[i].getCostPerItem();
+			Evaluation.minStock[i] = problem.getItems()[i].getMinAllowedInStock();
 		}
 	}
 	

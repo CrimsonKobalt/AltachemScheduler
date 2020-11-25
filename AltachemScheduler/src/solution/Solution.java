@@ -21,7 +21,7 @@ public class Solution {
 
 	//lijst met volgorde van items die we produceren + hoe veel blokken we dit doen
 	//orderPerMachine.get(i) is de volgorde voor machine i;
-	List<List<Item>> orderPerMachine;
+	List<ProductionOrder> orders;
 
 	public static Solution CreateInitialSolution(Problem problem) {
 		Solution solution = new Solution();
@@ -31,10 +31,7 @@ public class Solution {
 		solution.horizon = new Day[problem.getHorizon()];
 
 		//no production scheduled
-		solution.orderPerMachine = new ArrayList<List<Item>>();
-		for (Machine m : problem.getMachines()) {
-			solution.orderPerMachine.add(new ArrayList<Item>());
-		}
+		solution.orders = new ArrayList<ProductionOrder>();
 
 		//convert this initial solution to a feasible schedule.
 		solution.scheduleMaintenances(problem);
@@ -55,8 +52,8 @@ public class Solution {
 	}
 
 	/**
-	 * copy constructor to be used when creating a new solution for the algorithm (local search)
-	 *
+	 * copy constructor to be used when creating a new solution for the algorithm (local search): creates a solution skeleton
+	 * that will be modified by the local search swaps and afterwards have its schedule compiled with the constructSchedule()-method
 	 * @param solution old solution
 	 */
 	public Solution(Solution solution) {
@@ -66,12 +63,9 @@ public class Solution {
 		this.horizon = new Day[solution.horizon.length];
 
 		//remember the previously decided order of items to be produced (block per block)
-		this.orderPerMachine = new ArrayList<List<Item>>();
-		for (List<Item> itemlist : solution.orderPerMachine) {
-			this.orderPerMachine.add(new ArrayList<Item>());
-			for (Item item : itemlist) {
-				this.orderPerMachine.get(this.orderPerMachine.size() - 1).add(item);
-			}
+		this.orders = new ArrayList<ProductionOrder>();
+		for (ProductionOrder oldOrder : solution.orders) {
+			this.orders.add(new ProductionOrder(oldOrder));
 		}
 
 		//schedule the maintenances...
@@ -83,6 +77,10 @@ public class Solution {
 			this.horizon[i].overtime = solution.horizon[i].overtime;
 			this.horizon[i].parallelwerk = solution.horizon[i].parallelwerk;
 		}
+	}
+	
+	public void constructSchedule() {
+		//TODO: Brecht/Bente?
 	}
 
 	public void scheduleMaintenances(Problem problem) {
@@ -140,8 +138,8 @@ public class Solution {
 	//calls the calculateStock() function: this recalculates the stock levels. If this is unwanted, please remove.
 	private double evaluate() {
 		this.calculateStock();
-		Evaluation evaluation = new Evaluation(this.problem);
-		return evaluation.calculateObjectiveFunction(this);
+		Evaluation.configureEvaluation(this.problem);
+		return Evaluation.calculateObjectiveFunction(this);
 	}
 
 	//can be ignored if stock is kept another way.
