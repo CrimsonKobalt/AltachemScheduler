@@ -82,6 +82,45 @@ public class Solution {
 	public void constructSchedule() {
 		//TODO: Brecht/Bente?
 	}
+	
+	public void swapParallelWork(int randomInt) {
+		//TODO: use the timeHorizon.length to choose a day to swap
+	}
+	
+	public void swapOvertime(int randomInt1, int randomInt2) {
+		//TODO: use the timehorizon.length & randomInt1 to choose a day
+		//		and randomInt2 to select how many hours of overtime to schedule (using the startOfOvertime/endOfOvertime indices)
+	}
+	
+	public void swapNightShift(int randomInt) {
+		//TODO: use randomInt to swap a certain block to/from nightshift
+		//		turn off the entire nightshift if hit?
+		//		start a consecutive nightshift block from this day?
+	}
+	
+	public void addMachineOrder(int randomInt1, int randomInt2, int randomInt3) {
+		//TODO: create a random machineOrder & add it to the end
+	}
+	
+	public void addCountToOrder(int randomInt) {
+		//TODO: add 1 extra block to the selected (randomly) machineorder
+	}
+	
+	public void removeCountOrder(int randomInt) {
+		//TODO: remove 1 block from the selected (randomly) machineorder
+	}
+	
+	public void swapOrders(int randomInt1, int randomInt2) {
+		//TODO: swap two MachineOrder items from the orders-list.
+	}
+	
+	public void changeMachineForOrder(int randomInt1, int randomInt2) {
+		//TODO: select a random MachineOrder-block & swap the machine it is to be produced on.
+	}
+	
+	public List<ProductionOrder> getProductionOrders() {
+		return this.orders;
+	}
 
 	public void scheduleMaintenances(Problem problem) {
 

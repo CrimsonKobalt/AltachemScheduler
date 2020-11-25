@@ -79,8 +79,7 @@ Swaps zijn nu:
 				- overtime op een bepaalde dag? (0/1/2/3)
 				- parallelwerk op een bepaalde dag? (0/1)
 				- night shift gedurende een bepaalde periode?
-					- ja/neen
-					- verschuiven?
+					- ja/neen?
 					
 					--> hier moet de minimumperiode gerespecteerd worden alsook de carry-over
 					
