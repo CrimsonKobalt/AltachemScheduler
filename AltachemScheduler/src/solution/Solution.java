@@ -96,6 +96,7 @@ public class Solution {
 		//TODO: use randomInt to swap a certain block to/from nightshift
 		//		turn off the entire nightshift if hit?
 		//		start a consecutive nightshift block from this day?
+		//		OR add an extra day to the hit nightshift/try to take a day away from it (can't go less than 10, if so: remove the nightshift in its entirity)
 	}
 	
 	public void addMachineOrder(int randomInt1, int randomInt2, int randomInt3) {
