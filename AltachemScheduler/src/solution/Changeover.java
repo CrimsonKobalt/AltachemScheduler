@@ -27,7 +27,13 @@ public class Changeover extends Job {
 	public void setToItemId(int toItemId) {
 		this.toItemId = toItemId;
 	}
-
+	public boolean isSame(Changeover co) {
+		if(this.fromItemId==co.fromItemId && this.toItemId==co.toItemId) {
+			return true;
+		}else {
+			return false;
+		}
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
