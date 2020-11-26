@@ -42,4 +42,12 @@ public class ProductionOrder {
 	public void setMachineId(int Id) {
 		this.machineId = Id;
 	}
+	
+	public void incrementAmountOfBlocks() {
+		this.amountOfBlocks++;
+	}
+	
+	public void decrementAmountOfBlocks() {
+		this.amountOfBlocks--;
+	}
 }

@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -81,15 +82,21 @@ public class Solution {
 	
 	public void constructSchedule() {
 		//TODO: Brecht/Bente?
+		//even kort over nagedacht al: let op dat (dezelfde) changeovers nooit 2x per dag mogen plaatsvinden, let op dat 1 changeover (als die meerdere blokken inneemt)
+		//niet gespreid mag liggen over meerdere dagen.
+		//het enige dat tussen 2 blokken van dezelfde changeover mag liggen is het volgende: een maintenance/idle-block.
 	}
 	
+	//START SWAPS
 	public void swapParallelWork(int randomInt) {
-		//TODO: use the timeHorizon.length to choose a day to swap
+		this.horizon[randomInt % this.horizon.length].setParallelwerk(!this.horizon[randomInt % this.horizon.length].parallelwerk);
 	}
 	
 	public void swapOvertime(int randomInt1, int randomInt2) {
 		//TODO: use the timehorizon.length & randomInt1 to choose a day
 		//		and randomInt2 to select how many hours of overtime to schedule (using the startOfOvertime/endOfOvertime indices)
+		int maxUrenOvertime = this.problem.getLastOvertimeIndex() - this.problem.getLastDayShiftIndex();
+		this.horizon[randomInt1 % this.horizon.length].setOvertime(randomInt2 % maxUrenOvertime);
 	}
 	
 	public void swapNightShift(int randomInt) {
@@ -99,25 +106,34 @@ public class Solution {
 		//		OR add an extra day to the hit nightshift/try to take a day away from it (can't go less than 10, if so: remove the nightshift in its entirity)
 	}
 	
-	public void addMachineOrder(int randomInt1, int randomInt2, int randomInt3) {
-		//TODO: create a random machineOrder & add it to the end
+	public void addMachineOrder(int randomInt1, int randomInt2) {
+		//create a random machineOrder with size == 1 & add it to the end.
+		//TODO: is het beter om hier direct meerdere blokken toe te voegen? hmmm...
+		ProductionOrder po = new ProductionOrder(randomInt1 % this.problem.getItems().length, randomInt2 % this.problem.amountOfMachines(), 1);
+		this.orders.add(po);
 	}
 	
 	public void addCountToOrder(int randomInt) {
-		//TODO: add 1 extra block to the selected (randomly) machineorder
+		this.orders.get(randomInt % this.orders.size()).incrementAmountOfBlocks();
 	}
 	
 	public void removeCountOrder(int randomInt) {
-		//TODO: remove 1 block from the selected (randomly) machineorder
+		this.orders.get(randomInt % this.orders.size()).decrementAmountOfBlocks();
 	}
 	
 	public void swapOrders(int randomInt1, int randomInt2) {
-		//TODO: swap two MachineOrder items from the orders-list.
+		if(randomInt1 == randomInt2) randomInt2++;
+		Collections.swap(this.orders, randomInt1 % this.orders.size(), randomInt2 % this.orders.size());
 	}
 	
 	public void changeMachineForOrder(int randomInt1, int randomInt2) {
-		//TODO: select a random MachineOrder-block & swap the machine it is to be produced on.
+		this.orders.get(randomInt1 % this.orders.size()).setMachineId(randomInt2 % this.problem.amountOfMachines()); 
 	}
+	
+	public void changeItemForOrder(int randomInt1, int randomInt2) {
+		this.orders.get(randomInt1 % this.orders.size()).setItemId(randomInt2 % this.problem.getItems().length); 
+	}
+	//END SWAPS
 	
 	public List<ProductionOrder> getProductionOrders() {
 		return this.orders;
