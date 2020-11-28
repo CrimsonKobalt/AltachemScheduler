@@ -406,6 +406,10 @@ public class Solution {
 	}
 	
 	//START SWAPS
+	public void executeRandomSwap() {
+		//TODO: Bente?
+		
+	}
 	public void swapParallelWork(int randomInt) {
 		this.horizon[randomInt % this.horizon.length].setParallelwerk(!this.horizon[randomInt % this.horizon.length].parallelwerk);
 	}
@@ -418,6 +422,7 @@ public class Solution {
 	}
 	
 	public void swapNightShift(int randomInt) {
+		//TODO Bente kies maar iets, maar zorg ervoor dat alle mogelijkheden nog kunnen optreden he.
 		//TODO: use randomInt to swap a certain block to/from nightshift
 		//		turn off the entire nightshift if hit?
 		//		start a consecutive nightshift block from this day?
@@ -432,24 +437,34 @@ public class Solution {
 	}
 	
 	public void addCountToOrder(int randomInt) {
+		//TODO: Bente: wat als er geen productionorders zijn? -> vervangen door add...?
 		this.orders.get(randomInt % this.orders.size()).incrementAmountOfBlocks();
 	}
 	
 	public void removeCountOrder(int randomInt) {
+		//TODO: Bente: zelfde als hierboven
 		this.orders.get(randomInt % this.orders.size()).decrementAmountOfBlocks();
 	}
 	
 	public void swapOrders(int randomInt1, int randomInt2) {
+		//TODO: Bente: zelfde als hierboven
 		if(randomInt1 == randomInt2) randomInt2++;
 		Collections.swap(this.orders, randomInt1 % this.orders.size(), randomInt2 % this.orders.size());
 	}
 	
 	public void changeMachineForOrder(int randomInt1, int randomInt2) {
+		//TODO: Bente: zelfde als hierboven
 		this.orders.get(randomInt1 % this.orders.size()).setMachineId(randomInt2 % this.problem.amountOfMachines()); 
 	}
 	
 	public void changeItemForOrder(int randomInt1, int randomInt2) {
+		//TODO: Bente?
 		this.orders.get(randomInt1 % this.orders.size()).setItemId(randomInt2 % this.problem.getItems().length); 
+	}
+	
+	//TODO: mss in de lijst van requests 2 van plaats wisselen?
+	public void swapRequestOrder(int randomInt1, int randomInt2) {
+		//TODO: Bente?
 	}
 	//END SWAPS
 	
