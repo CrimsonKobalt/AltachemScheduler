@@ -15,6 +15,8 @@ public class Evaluation {
 	
 	private static int[] minStock;
 	
+	private static double value = Double.MAX_VALUE;
+	
 	public static double calculateObjectiveFunction(Solution solution) {
 		double result = 0;
 		List<Request> shippedRequests = new ArrayList<>();
@@ -44,6 +46,9 @@ public class Evaluation {
 				}
 			}	
 		}
+		
+		//check for not-full nightshifts
+		Evaluation.value = result;
 		return result;
 	}
 	
@@ -61,5 +66,7 @@ public class Evaluation {
 		}
 	}
 	
-	
+	public static double getResult(){
+		return Evaluation.value;
+	}
 }

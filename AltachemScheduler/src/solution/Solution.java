@@ -23,6 +23,9 @@ public class Solution {
 	//lijst met volgorde van items die we produceren + hoe veel blokken we dit doen
 	//orderPerMachine.get(i) is de volgorde voor machine i;
 	List<ProductionOrder> orders;
+	
+	//calculated cost
+	private double cost;
 
 	public static Solution CreateInitialSolution(Problem problem) {
 		Solution solution = new Solution();
@@ -44,6 +47,8 @@ public class Solution {
 				solution.horizon[i].setNachtshift(true);
 			}
 		}
+		
+		solution.cost = Double.MAX_VALUE;
 
 		return solution;
 	}
@@ -78,6 +83,8 @@ public class Solution {
 			this.horizon[i].overtime = solution.horizon[i].overtime;
 			this.horizon[i].parallelwerk = solution.horizon[i].parallelwerk;
 		}
+		
+		this.cost = Double.MAX_VALUE;
 	}
 	
 	public void constructSchedule() {
@@ -427,6 +434,8 @@ public class Solution {
 		//		turn off the entire nightshift if hit?
 		//		start a consecutive nightshift block from this day?
 		//		OR add an extra day to the hit nightshift/try to take a day away from it (can't go less than 10, if so: remove the nightshift in its entirity)
+		//		nightshifts mogen optreden aan het einde van de periode ook & moeten hiet niet per se hun volledige periode uitzitten.
+					//hoe brengen we dit in rekening?
 	}
 	
 	public void addMachineOrder(int randomInt1, int randomInt2) {
@@ -525,10 +534,18 @@ public class Solution {
 	}
 
 	//calls the calculateStock() function: this recalculates the stock levels. If this is unwanted, please remove.
-	private double evaluate() {
+	public double evaluate() {
 		this.calculateStock();
 		Evaluation.configureEvaluation(this.problem);
-		return Evaluation.calculateObjectiveFunction(this);
+		this.cost = Evaluation.calculateObjectiveFunction(this);
+		return this.cost;
+	}
+	
+	public double getCost() {
+		if(this.cost == Double.MAX_VALUE) {
+			System.out.println("encoutered situation where cost has not been calculated...");
+		} 
+		return this.cost;
 	}
 
 	//can be ignored if stock is kept another way.
