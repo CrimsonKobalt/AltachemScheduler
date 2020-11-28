@@ -48,6 +48,23 @@ public class Evaluation {
 		}
 		
 		//check for not-full nightshifts
+		if(solution.horizon[solution.horizon.length - 1].nachtshift) {
+			int extraNightShiftsToPay = solution.problem.getMinimumConsecutiveNightShifts();
+			int count = extraNightShiftsToPay;
+			if(extraNightShiftsToPay >= solution.horizon.length) {
+				System.out.println("Gemene input: minAantalConsecutiveNightShifts > horizon.length");
+			}
+			for(int i=0; i<count; i++) {
+				if(solution.horizon[solution.horizon.length-i].nachtshift) {
+					extraNightShiftsToPay--;
+				} else {
+					break;
+				}
+			}
+			result += extraNightShiftsToPay * Evaluation.nightshiftCost;
+		}
+		
+		//done
 		Evaluation.value = result;
 		return result;
 	}
