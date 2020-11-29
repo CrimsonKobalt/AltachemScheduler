@@ -1,6 +1,7 @@
 package solver;
 
 import model.Problem;
+import solution.OverStockException;
 import solution.Solution;
 
 public class AltachemSolver {
@@ -23,7 +24,12 @@ public class AltachemSolver {
 		//initial solution --------------------------------------
 		
 		solution = Solution.CreateInitialSolution(problem);
-		solution.evaluate();
+		try {
+			solution.evaluate();
+		} catch (OverStockException e1) {
+			System.err.println("initial solution cannot be constructed due to stock-overflow.");
+			return null;
+		}
 		bestSolution = solution;
 		listener.improved(bestSolution);
 		
@@ -47,6 +53,15 @@ public class AltachemSolver {
 			
 			//compile and recalculate
 			solution.constructSchedule();
+			
+			try {
+				solution.evaluate();
+			} catch (OverStockException e) {
+				idle++;
+				e.printStackTrace();
+				continue;
+			}
+			
 			double newCost = solution.getCost();
 			
 			// [meta] accept? -----------------------------------
