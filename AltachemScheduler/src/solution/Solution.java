@@ -20,6 +20,8 @@ public class Solution {
 	//orderPerMachine.get(i) is de volgorde voor machine i;
 	List<ProductionOrder> orders;
 	
+	List<Request> requestOrder;
+	
 	//calculated cost
 	private double cost;
 
@@ -45,6 +47,11 @@ public class Solution {
 		}
 		
 		solution.cost = Double.MAX_VALUE;
+		
+		solution.requestOrder = new ArrayList<>();
+		for(int i=0; i<problem.getRequests().length; i++) {
+			solution.requestOrder.add(problem.getRequests()[i]);
+		}
 
 		return solution;
 	}
@@ -87,6 +94,12 @@ public class Solution {
 	}
 	
 	public void constructSchedule() {
+		//TODO: 1) construct schedule
+		//TODO: 2) gebruik die calculateStock() functie
+		//TODO: 3) overloop de requests in requestOrder en probeer ze zo vroeg mogelijk te shippen.
+		//(geen rekening houden met te veel stock constraint: dit wordt in Evaluation gedaan)
+		
+		
 		//TODO: Brecht/Bente?
 		//even kort over nagedacht al: let op dat (dezelfde) changeovers nooit 2x per dag mogen plaatsvinden, let op dat 1 changeover (als die meerdere blokken inneemt)
 		//niet gespreid mag liggen over meerdere dagen.
@@ -437,6 +450,8 @@ public class Solution {
 	}
 
 	public void swapOvertime(int randomInt1, int randomInt2) {
+		//TODO: zorg dat die niet kan als we op een nachtshift vallen
+		// ---> geef in de plaats een nachtshiftswap op die dag door ofzo.
 		//use the timehorizon.length & randomInt1 to choose a day
 		//use randomInt2 to select how many hours of overtime to schedule (using the startOfOvertime/endOfOvertime indices)
 		int maxUrenOvertime = this.problem.getLastOvertimeIndex() - this.problem.getLastDayShiftIndex();
@@ -444,6 +459,8 @@ public class Solution {
 	}
 	
 	public void swapNightShift(int randomInt, boolean randomBool1, boolean randomBool2) {
+		//TODO: rekening houden met die eerste dagen
+		// 		-> als de history het nodig acht dat er in het begin nachtshifts zijn mag je die niet uitzetten.
 		//TODO: nightshifts mogen optreden aan het einde van de periode ook & moeten hiet niet per se hun volledige periode uitzitten.
 		// hoe brengen we dit in rekening?
 
@@ -595,8 +612,9 @@ public class Solution {
 		int index2 = randomInt2%problem.getRequests().length;
 
 		//zelfde index => nieuw random getal
-		while (randomInt1 == randomInt2)
-			randomInt1 = new Random().nextInt();
+		while (index1 == index2) {
+			index2 = new Random().nextInt() % problem.getRequests().length;
+		}
 
 		Request[] requests = problem.getRequests();
 		Request temp = requests[index2];
@@ -705,14 +723,6 @@ public class Solution {
 						thisDay.stock[item.getItemId()] += this.problem.getMachines()[i].getItemEfficiencies()[item.getItemId()];
 					}
 				}
-			}
-		}
-		//subtract the shipped amounts (if any)
-		for (Request r : thisDay.shippedToday) {
-			for (int i = 0; i < r.getAmountsRequested().length; i++) {
-				thisDay.stock[i] -= r.getAmountsRequested()[i];
-				assert thisDay.stock[i] >= 0 : "stock for item " + i + " under 0";
-				assert thisDay.stock[i] <= this.problem.getItems()[i].getMaxAllowedInStock() : "stock for item " + i + " over allowed level: " + thisDay.stock[i];
 			}
 		}
 		//end
