@@ -680,7 +680,7 @@ public class Solution {
 	}
 
 	//calls the calculateStock() function: this recalculates the stock levels. If this is unwanted, please remove.
-	public double evaluate() {
+	public double evaluate() throws OverStockException{
 		this.calculateStock();
 		Evaluation.configureEvaluation(this.problem);
 		this.cost = Evaluation.calculateObjectiveFunction(this);
@@ -748,7 +748,7 @@ public class Solution {
 		sb.append(this.problem.getInstanceName());
 		sb.append("\n");
 		sb.append("Cost: ");
-		sb.append(String.format(Locale.ENGLISH, "%.2f", this.evaluate()));
+		sb.append(String.format(Locale.ENGLISH, "%.2f", this.cost));
 		sb.append("\n");
 		for(int i=0; i<horizon.length; i++) {
 			sb.append("#Day " + i + "\n");

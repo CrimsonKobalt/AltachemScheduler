@@ -14,10 +14,11 @@ public class Evaluation {
 	private static double[] itemRevenue;
 	
 	private static int[] minStock;
+	private static int[] maxStock;
 	
 	private static double value = Double.MAX_VALUE;
 	
-	public static double calculateObjectiveFunction(Solution solution) {
+	public static double calculateObjectiveFunction(Solution solution) throws OverStockException{
 		double result = 0;
 		List<Request> shippedRequests = new ArrayList<>();
 		
@@ -31,6 +32,7 @@ public class Evaluation {
 			//add stock cost
 			for(int i=0; i<d.stock.length; i++) {
 				if(d.stock[i] < minStock[i]) result += Evaluation.underStockPenaltyCost;
+				if(d.stock[i] > maxStock[i]) throw new OverStockException();
 			}
 			//add requests to shippedRequests if they have been shipped
 			for(Request r : d.shippedToday) {
@@ -80,6 +82,7 @@ public class Evaluation {
 		for(int i=0; i<itemRevenue.length; i++) {
 			Evaluation.itemRevenue[i] = problem.getItems()[i].getCostPerItem();
 			Evaluation.minStock[i] = problem.getItems()[i].getMinAllowedInStock();
+			Evaluation.maxStock[i] = problem.getItems()[i].getMaxAllowedInStock();
 		}
 	}
 	
