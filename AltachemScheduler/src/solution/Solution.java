@@ -101,7 +101,7 @@ public class Solution {
 			if(!horizon[currentDay].parallelwerk) { //GEEN PARALLELWERK
 				
 				//Zoek blocks zonder production om changeover te plannen (maintenance mag er wel tussenzitten)
-				if(problem.getMachines()[currentOrder.getMachineId()].getLastItemIdProduced() != currentOrder.getItemId()) {				
+				if(lastProduced != nextProduce) {				
 					
 					Changeover co = new Changeover(lastProduced, nextProduce);
 					for(Changeover c : allChangeoversOnDay) {
@@ -273,7 +273,7 @@ public class Solution {
 		}else {
 			//WEL PARALLELWERK
 			//Zoek blocks zonder production om changeover te plannen (maintenance mag er wel tussenzitten)
-			if(problem.getMachines()[currentOrder.getMachineId()].getLastItemIdProduced() != currentOrder.getItemId()) {				
+			if(lastProduced != nextProduce) {				
 				
 				int currentMachineId = currentOrder.getMachineId();
 				Changeover co = new Changeover(lastProduced, nextProduce);
