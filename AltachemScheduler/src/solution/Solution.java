@@ -2,11 +2,7 @@ package solution;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 import model.Item;
 import model.Machine;
@@ -414,28 +410,112 @@ public class Solution {
 	
 	//START SWAPS
 	public void executeRandomSwap() {
-		//TODO: Bente?
+		Random random = new Random();
+		int randomInt = random.nextInt(9);
+
+		//TODO: allemaal voorkomend met zelfde kans of kansen aanpassen (vb minder proberen voor night shift?)
+
+		switch (randomInt){
+			case 0: swapParallelWork(random.nextInt()); break;
+			case 1: swapNightShift(random.nextInt(), random.nextBoolean(), random.nextBoolean()); break;
+			case 2: swapOvertime(random.nextInt(), random.nextInt()); break;
+			case 3: swapOrders(random.nextInt(), random.nextInt()); break;
+			case 4: swapRequestOrder(random.nextInt(), random.nextInt()); break;
+			case 5: incrementOrderCount(random.nextInt()); break;
+			case 6: decrementOrderCount(random.nextInt()); break;
+			case 7: changeMachineForOrders(random.nextInt(), random.nextInt()); break;
+			case 8: changeItemForOrder(random.nextInt(), random.nextInt()); break;
+			default: break;
+		}
 		
 	}
 	public void swapParallelWork(int randomInt) {
 		this.horizon[randomInt % this.horizon.length].setParallelwerk(!this.horizon[randomInt % this.horizon.length].parallelwerk);
 	}
-	
+
 	public void swapOvertime(int randomInt1, int randomInt2) {
-		//TODO: use the timehorizon.length & randomInt1 to choose a day
-		//		and randomInt2 to select how many hours of overtime to schedule (using the startOfOvertime/endOfOvertime indices)
+		//use the timehorizon.length & randomInt1 to choose a day
+		//use randomInt2 to select how many hours of overtime to schedule (using the startOfOvertime/endOfOvertime indices)
 		int maxUrenOvertime = this.problem.getLastOvertimeIndex() - this.problem.getLastDayShiftIndex();
 		this.horizon[randomInt1 % this.horizon.length].setOvertime(randomInt2 % maxUrenOvertime);
 	}
 	
-	public void swapNightShift(int randomInt) {
-		//TODO Bente kies maar iets, maar zorg ervoor dat alle mogelijkheden nog kunnen optreden he.
-		//TODO: use randomInt to swap a certain block to/from nightshift
-		//		turn off the entire nightshift if hit?
-		//		start a consecutive nightshift block from this day?
-		//		OR add an extra day to the hit nightshift/try to take a day away from it (can't go less than 10, if so: remove the nightshift in its entirity)
-		//		nightshifts mogen optreden aan het einde van de periode ook & moeten hiet niet per se hun volledige periode uitzitten.
-					//hoe brengen we dit in rekening?
+	public void swapNightShift(int randomInt, boolean randomBool1, boolean randomBool2) {
+		//TODO: nightshifts mogen optreden aan het einde van de periode ook & moeten hiet niet per se hun volledige periode uitzitten.
+		// hoe brengen we dit in rekening?
+
+		int index = randomInt % this.horizon.length;
+		//TODO: worden dagen na horizon behandeld in constructschedule?
+		//indien random gekozen dag al een night shift is
+		if (horizon[index].isNachtshift()){
+
+			//controleer waar bestaande night shift begint en eindigt
+			int startNightshift = index;
+			while(horizon[startNightshift].isNachtshift() && startNightshift >= 0)
+				startNightshift--;
+			startNightshift++;
+
+			//TODO: wat indien night shift doorlopen na horizon
+			int endNightshift = index;
+			while(horizon[endNightshift].isNachtshift() && endNightshift < horizon.length)
+				endNightshift++;
+			endNightshift--;
+
+			int consecutiveNightshifts = endNightshift-startNightshift+1;
+
+			//random dag toevoegen of verwijderen (verwijder alle night shifts indien minder dan 10 dagen)
+			//nightshifts toevoegen
+			if (randomBool1){
+
+				//indien voorraan toevoegen enige mogelijkheid
+				if (endNightshift == horizon.length-1 && startNightshift > 0)
+					horizon[startNightshift-1].setNachtshift(true);
+
+				//indien achteraan toevoegen enige mogelijkheid
+				else if (startNightshift == 0 && endNightshift < horizon.length-1)
+					horizon[endNightshift+1].setNachtshift(true);
+
+				//voorraan en achteraan toevoegen is mogelijk
+				//voorraan toevoegen
+				else if (randomBool2)
+					horizon[startNightshift-1].setNachtshift(true);
+
+				//achteraan toevoegen
+				else
+					horizon[endNightshift+1].setNachtshift(true);
+
+			}
+
+			//nightshifts verwijderen
+			else{
+
+				//TODO: wat indien night shift doorlopen na horizon
+				if (consecutiveNightshifts == 10){
+					//alles verwijderen
+					for (int i=startNightshift; i<=endNightshift; i++)
+						horizon[i].setNachtshift(false);
+
+				}
+				else{
+					//enkel eerste dag verwijderen
+					if (randomBool2)
+						horizon[startNightshift].setNachtshift(false);
+					//enkel laatste dag verwijderen
+					else
+						horizon[endNightshift].setNachtshift(false);
+				}
+			}
+		}
+		else{
+			//TODO: gekozen dag is al random, extra random nodig om beginnen toe te voegen van x dagen voor deze dag?
+			//voeg 10 dagen night shift toe vanaf huidige dag
+			for (int i=0; i < 10; i++){
+				if (index+i >= horizon.length)
+					break;
+				this.horizon[index+i].setNachtshift(true);
+			}
+
+		}
 	}
 	
 	public void addMachineOrder(int randomInt1, int randomInt2) {
@@ -445,35 +525,80 @@ public class Solution {
 		this.orders.add(po);
 	}
 	
-	public void addCountToOrder(int randomInt) {
-		//TODO: Bente: wat als er geen productionorders zijn? -> vervangen door add...?
-		this.orders.get(randomInt % this.orders.size()).incrementAmountOfBlocks();
+	public void incrementOrderCount(int randomInt) {
+
+		//indien geen productionorders => vervangen door add
+		if (orders.isEmpty())
+			addMachineOrder(randomInt, new Random().nextInt());
+
+		//voeg block toe aan random ProductionOrder
+		else
+			this.orders.get(randomInt % this.orders.size()).incrementAmountOfBlocks();
 	}
 	
-	public void removeCountOrder(int randomInt) {
-		//TODO: Bente: zelfde als hierboven
-		this.orders.get(randomInt % this.orders.size()).decrementAmountOfBlocks();
+	public void decrementOrderCount(int randomInt) {
+
+		//indien geen productionorders => vervangen door add
+		if (orders.isEmpty())
+			addMachineOrder(randomInt, new Random().nextInt());
+
+		//neem block weg van random ProductionOrder
+		else
+			this.orders.get(randomInt % this.orders.size()).decrementAmountOfBlocks();
+
 	}
-	
+
 	public void swapOrders(int randomInt1, int randomInt2) {
-		//TODO: Bente: zelfde als hierboven
-		if(randomInt1 == randomInt2) randomInt2++;
-		Collections.swap(this.orders, randomInt1 % this.orders.size(), randomInt2 % this.orders.size());
+
+		//indien geen productionorders => vervangen door add
+		if (orders.isEmpty() || orders.size() == 1)
+			addMachineOrder(randomInt1, randomInt2);
+
+		//swap indexes of 2 random orders
+		else{
+			//zelfde index => nieuw random getal
+			while (randomInt1 == randomInt2)
+				randomInt1 = new Random().nextInt();
+
+			Collections.swap(this.orders, randomInt1 % this.orders.size(), randomInt2 % this.orders.size());
+		}
+
 	}
 	
-	public void changeMachineForOrder(int randomInt1, int randomInt2) {
-		//TODO: Bente: zelfde als hierboven
-		this.orders.get(randomInt1 % this.orders.size()).setMachineId(randomInt2 % this.problem.amountOfMachines()); 
+	public void changeMachineForOrders(int randomInt1, int randomInt2) {
+
+		//indien geen productionorders zijn => vervangen door add
+		if (orders.isEmpty())
+			addMachineOrder(randomInt1, randomInt2);
+
+		//change machineId of random order
+		else
+			this.orders.get(randomInt1 % this.orders.size()).setMachineId(randomInt2 % this.problem.amountOfMachines());
 	}
 	
 	public void changeItemForOrder(int randomInt1, int randomInt2) {
-		//TODO: Bente?
-		this.orders.get(randomInt1 % this.orders.size()).setItemId(randomInt2 % this.problem.getItems().length); 
+		//indien geen productionorders zijn => vervangen door add
+		if (orders.isEmpty())
+			addMachineOrder(randomInt1, randomInt2);
+
+		//change itemId of random order
+		else
+			this.orders.get(randomInt1 % this.orders.size()).setItemId(randomInt2 % this.problem.getItems().length);
 	}
 	
-	//TODO: mss in de lijst van requests 2 van plaats wisselen?
+	//wissel 2 requests van plaats in array
 	public void swapRequestOrder(int randomInt1, int randomInt2) {
-		//TODO: Bente?
+		int index1 = randomInt1%problem.getRequests().length;
+		int index2 = randomInt2%problem.getRequests().length;
+
+		//zelfde index => nieuw random getal
+		while (randomInt1 == randomInt2)
+			randomInt1 = new Random().nextInt();
+
+		Request[] requests = problem.getRequests();
+		Request temp = requests[index2];
+		requests[index2] = requests[index1];
+		requests[index1] = temp;
 	}
 	//END SWAPS
 	

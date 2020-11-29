@@ -348,4 +348,7 @@ public class Problem {
 		this.changeoverDurations = changeoverDurations;
 	}
 
+	public void setRequests(Request[] requests) {
+		this.requests = requests;
+	}
 }
