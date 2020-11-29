@@ -93,7 +93,7 @@ public class Solution {
 		this.cost = Double.MAX_VALUE;
 	}
 	
-	public void constructSchedule() {
+	public void constructSchedule() throws Exception {
 		//TODO: 1) construct schedule
 		//TODO: 2) gebruik die calculateStock() functie
 		//TODO: 3) overloop de requests in requestOrder en probeer ze zo vroeg mogelijk te shippen.
@@ -105,7 +105,278 @@ public class Solution {
 		//niet gespreid mag liggen over meerdere dagen.
 		//het enige dat tussen 2 blokken van dezelfde changeover mag liggen is het volgende: een maintenance/idle-block.
 		
-		List<Changeover> allChangeoversOnDay = new ArrayList<>(); //om te kijken of changeover al geweest is op deze dag
+		List<Integer[]> currentData = new ArrayList<>(); //data per machine
+		for(int m=0;m<problem.getMachines().length;m++) {
+			Integer[] machineDate = new Integer[3];
+			machineDate[0] = 0; //current day
+			machineDate[1] = 0; //current block
+			machineDate[2] = problem.getMachines()[m].getLastItemIdProduced(); //last item produced
+			currentData.add(machineDate);
+		}
+		for(ProductionOrder po : orders) {
+			int currentMachine = po.getMachineId();
+			//System.out.println("Machine: " + currentMachine);
+			int currentBlock = currentData.get(currentMachine)[1];
+			int currentDay = currentData.get(currentMachine)[0];
+			int lastProduced = currentData.get(currentMachine)[2];
+			int coDuration = problem.getChangeoverDurations()[lastProduced][po.getItemId()];
+			
+			
+			Changeover co = new Changeover(lastProduced, po.getItemId());
+			searchDayWithoutSameChangeover(co, currentDay, currentBlock);
+			
+			int consecutiveBlocks = 0; //wordt terug op nul gezet als er een production gevonden wordt
+			int startBlock = currentBlock;	
+			List<Integer> maintenanceBlocks = new ArrayList<>(); //bijhouden om achteraf de changoverblocks in te vullen
+			
+			boolean isLargeCo = problem.getIsLargeChangeover()[lastProduced][po.getItemId()];
+			if(!isLargeCo) { 				
+				
+				while(consecutiveBlocks<coDuration) {
+					
+					if(horizon[currentDay].parallelwerk || currentBlock>problem.getLastDayShiftIndex()) { 
+						//PARALLELWERK
+						if(new Idle().equals(horizon[currentDay].jobs[currentMachine][currentBlock])) {
+							consecutiveBlocks++;
+						}else if(new Production(1).isProduction(horizon[currentDay].jobs[currentMachine][currentBlock])) {
+							consecutiveBlocks= 0;
+							startBlock = currentBlock + 1;
+						}else if(new Changeover(1, 0).isChangeover(horizon[currentDay].jobs[currentMachine][currentBlock])){
+							consecutiveBlocks= 0;
+							startBlock = currentBlock + 1;
+						}else {
+							maintenanceBlocks.add(currentBlock);
+						}
+						currentBlock++;
+						if(currentBlock >= (problem.getLastDayShiftIndex() + horizon[currentDay].getOvertime())
+								&& !horizon[currentDay].isNachtshift()) {
+							currentBlock = 0;
+							currentDay++;
+							searchDayWithoutSameChangeover(co, currentDay, currentBlock);
+							startBlock = 0; 
+							consecutiveBlocks = 0;
+							if(currentDay>=horizon.length) {
+								throw new Exception();
+							}
+							maintenanceBlocks.clear();
+						}else if(currentBlock>=problem.getBlocksPerDay() && horizon[currentDay].isNachtshift()) {
+							currentBlock = 0;
+							currentDay++;
+							startBlock = 0; 
+							consecutiveBlocks = 0;
+							if(currentDay>=horizon.length) {
+								throw new Exception();
+							}
+							searchDayWithoutSameChangeover(co, currentDay, currentBlock);
+							maintenanceBlocks.clear();
+						}
+					}else { // GEEN PARALLELWERK
+						boolean bothIdle = false;
+						for(int m=0;m<problem.getMachines().length;m++) {
+							if(new Idle().equals(horizon[currentDay].jobs[m][currentBlock])) {				
+								
+								bothIdle =true;
+							}else if(new Production(1).isProduction(horizon[currentDay].jobs[m][currentBlock])) { //maakt niet uit welk item
+								consecutiveBlocks = 0;
+								startBlock = currentBlock +1;
+								bothIdle = false;
+							}else {
+								bothIdle = false;
+								maintenanceBlocks.add(currentBlock);
+								
+							}
+						}
+						if(bothIdle) {
+							consecutiveBlocks++;
+							
+						}
+							
+						currentBlock++;
+						//Changeover moet in dezelfde dag voltooid worden
+						if(currentBlock >= (problem.getLastDayShiftIndex() + horizon[currentDay].getOvertime())
+								&& !horizon[currentDay].isNachtshift()) {
+							currentBlock = 0;
+							currentDay++;
+							if(currentDay>=horizon.length) {
+								throw new Exception();
+							}
+							searchDayWithoutSameChangeover(co, currentDay, currentBlock);
+							startBlock = 0; 
+							consecutiveBlocks = 0;
+							maintenanceBlocks.clear();
+						}else if(currentBlock>=problem.getBlocksPerDay() && horizon[currentDay].isNachtshift()) {
+							currentBlock = 0;
+							currentDay++;
+							if(currentDay>=horizon.length) {
+								throw new Exception();
+							}
+							searchDayWithoutSameChangeover(co, currentDay, currentBlock);
+							startBlock = 0;
+							consecutiveBlocks = 0;
+							maintenanceBlocks.clear();
+						}
+					}
+				}
+				
+					
+				}else{
+					// Large Changeover
+					
+					while(consecutiveBlocks<coDuration) {
+						if(currentBlock>=problem.getTechnicianStartIndex() && currentBlock<=problem.getTechnicianStopIndex()) {
+							
+							if(horizon[currentDay].parallelwerk || currentBlock>problem.getLastDayShiftIndex()) { 
+								//PARALLELWERK
+								if(new Idle().equals(horizon[currentDay].jobs[currentMachine][currentBlock])) {
+									consecutiveBlocks++;
+								}else if(new Production(1).isProduction(horizon[currentDay].jobs[currentMachine][currentBlock])) {
+									consecutiveBlocks= 0;
+									startBlock = currentBlock + 1;
+								}else {
+									maintenanceBlocks.add(currentBlock);
+								}
+								
+							}else { // GEEN PARALLELWERK
+								boolean bothIdle = false;
+								for(int m=0;m<problem.getMachines().length;m++) {
+									if(new Idle().equals(horizon[currentDay].jobs[m][currentBlock])) {				
+										
+										bothIdle =true;
+									}else if(new Production(1).isProduction(horizon[currentDay].jobs[m][currentBlock])) { //maakt niet uit welk item
+										consecutiveBlocks = 0;
+										startBlock = currentBlock +1;
+										bothIdle = false;
+									}else {
+										bothIdle = false;
+										maintenanceBlocks.add(currentBlock);
+										
+									}
+								}
+								if(bothIdle) {
+									consecutiveBlocks++;
+									
+								}
+							}
+						}
+						
+								
+						currentBlock++;
+						//Changeover moet in dezelfde dag voltooid worden
+						if(currentBlock >= (problem.getLastDayShiftIndex() + horizon[currentDay].getOvertime())
+								&& !horizon[currentDay].isNachtshift()) {
+							currentBlock = 0;
+							currentDay++;
+							searchDayWithoutSameChangeover(co, currentDay, currentBlock);
+							if(currentDay>=horizon.length) {
+								throw new Exception();
+							}
+							startBlock = 0; 
+							consecutiveBlocks = 0;
+							maintenanceBlocks.clear();
+						}else if(currentBlock>=problem.getBlocksPerDay() && horizon[currentDay].isNachtshift()) {
+							currentBlock = 0;
+							currentDay++;
+							searchDayWithoutSameChangeover(co, currentDay, currentBlock);
+							if(currentDay>=horizon.length) {
+								throw new Exception();
+							}
+							startBlock = 0;
+							consecutiveBlocks = 0;
+							maintenanceBlocks.clear();
+						}
+					}
+				}	
+					//changeoverBlocks toekennen
+				for(int b = startBlock; b < startBlock+coDuration+maintenanceBlocks.size(); b++) {
+					if(maintenanceBlocks.contains(b)) {
+						//Do nothing
+					}else {
+						horizon[currentDay].setJob(co, po.getMachineId(), b);
+						System.out.println(horizon[currentDay].jobs[po.getMachineId()][b]);
+					}					
+				}					
+				//start producing
+				int blocksProduced = 0;
+				while(blocksProduced<po.getAmountOfBlocks()) {
+					System.out.println("in while producing");
+					if(horizon[currentDay].parallelwerk || currentBlock>problem.getLastDayShiftIndex()) { //PARALLELWERK
+						if(new Idle().equals(horizon[currentDay].jobs[currentMachine][currentBlock])) {
+							blocksProduced++;
+							horizon[currentDay].setJob(new Production(po.getItemId()), currentMachine, currentBlock);
+							System.out.println(horizon[currentDay].jobs[currentMachine][currentBlock]);
+						}else {
+							//Do nothing
+						}
+					}else { //GEEN PARALLELWERK
+						boolean bothIdle = true;
+						for(int m=0;m<problem.getMachines().length;m++) {
+							if(!new Idle().equals(horizon[currentDay].jobs[currentMachine][currentBlock])) {
+								bothIdle = false;
+							}
+						}
+						if(bothIdle) {
+							blocksProduced++;
+							horizon[currentDay].setJob(new Production(po.getItemId()), currentMachine, currentBlock);
+							System.out.println(horizon[currentDay].jobs[currentMachine][currentBlock]);
+						}else {
+							//Do nothing
+						}
+					}
+					currentBlock++;
+					if(currentBlock > (problem.getLastDayShiftIndex() + horizon[currentDay].getOvertime())
+							&& !horizon[currentDay].isNachtshift()) {
+						currentBlock = 0;
+						currentDay++;
+						if(currentDay>=horizon.length) {
+							throw new Exception();
+						}
+					}else if(currentBlock>=problem.getBlocksPerDay() && horizon[currentDay].isNachtshift()) {
+						currentBlock = 0;
+						currentDay++;
+						if(currentDay>=horizon.length) {
+							throw new Exception();
+						}
+					}
+				}
+				currentData.get(currentMachine)[1] = currentBlock;
+				currentData.get(currentMachine)[0] = currentDay;
+				currentData.get(currentMachine)[2] = po.getItemId();
+				
+			}//End of orders
+			
+		
+			calculateStock();
+		
+			//handleRquests()
+			List<Request> requests = new ArrayList<>();
+			int day = 0;
+			for(Request request : requests) {				
+				boolean shipped = false;
+				while(!shipped) {
+					for(int d=day;d<horizon.length;d++) {
+						if(request.isShippingDay(d)) {
+							boolean enoughStock = true;
+							for(int i=0;i<request.getAmountsRequested().length;i++) {
+								if(request.getAmountsRequested()[i]>horizon[day].stock[i]) {
+									enoughStock = false;
+								}
+							}
+							if(enoughStock) {
+								
+								for(int n=day;n<horizon.length;n++) {
+									for(int i=0;i<request.getAmountsRequested().length;i++) {
+										horizon[n].stock[i] -= request.getAmountsRequested()[i];
+									}
+								}
+								shipped=true;
+								horizon[day].shippedToday.add(request);
+								break;
+							}
+						}
+					}
+				}
+			}
+		/*List<Changeover> allChangeoversOnDay = new ArrayList<>(); //om te kijken of changeover al geweest is op deze dag
 		int index = 0;
 		int blocksProduced = 0;		
 		ProductionOrder currentOrder = orders.get(index);
@@ -421,35 +692,41 @@ public class Solution {
 				nextProduce = currentOrder.getItemId();
 			}
 		}
-	}
+	}*/
 	}
 	
 	//START SWAPS
 	public void executeRandomSwap() {
 		Random random = new Random();
 		int randomInt = random.nextInt(9);
-
+		int randPosInt = random.nextInt();
+		randPosInt = Math.abs(randPosInt);
+		int randPosInt2 = random.nextInt();
+		randPosInt2 = Math.abs(randPosInt2);
+		//System.out.println(randPosInt + "\t" + randPosInt2);
 		//TODO: allemaal voorkomend met zelfde kans of kansen aanpassen (vb minder proberen voor night shift?)
 
 		switch (randomInt){
-			case 0: swapParallelWork(random.nextInt()); break;
-			case 1: swapNightShift(random.nextInt(), random.nextBoolean(), random.nextBoolean()); break;
-			case 2: swapOvertime(random.nextInt(), random.nextInt()); break;
-			case 3: swapOrders(random.nextInt(), random.nextInt()); break;
-			case 4: swapRequestOrder(random.nextInt(), random.nextInt()); break;
-			case 5: incrementOrderCount(random.nextInt()); break;
-			case 6: decrementOrderCount(random.nextInt()); break;
-			case 7: changeMachineForOrders(random.nextInt(), random.nextInt()); break;
-			case 8: changeItemForOrder(random.nextInt(), random.nextInt()); break;
+			case 0: swapParallelWork(randPosInt); break;
+			case 1: swapNightShift(randPosInt, random.nextBoolean(), random.nextBoolean()); break;
+			case 2: swapOvertime(randPosInt, randPosInt2); break;
+			case 3: swapOrders(randPosInt, randPosInt2); break;
+			case 4: swapRequestOrder(randPosInt, randPosInt2); break;
+			case 5: incrementOrderCount(randPosInt); break;
+			case 6: decrementOrderCount(randPosInt); break;
+			case 7: changeMachineForOrders(randPosInt, randPosInt2); break;
+			case 8: changeItemForOrder(randPosInt, randPosInt2); break;
 			default: break;
 		}
 		
 	}
 	public void swapParallelWork(int randomInt) {
+		System.out.println("swapParallelWork");
 		this.horizon[randomInt % this.horizon.length].setParallelwerk(!this.horizon[randomInt % this.horizon.length].parallelwerk);
 	}
 
 	public void swapOvertime(int randomInt1, int randomInt2) {
+		System.out.println("swapOvertime");
 		//TODO: zorg dat die niet kan als we op een nachtshift vallen
 		// ---> geef in de plaats een nachtshiftswap op die dag door ofzo.
 		//use the timehorizon.length & randomInt1 to choose a day
@@ -459,6 +736,7 @@ public class Solution {
 	}
 	
 	public void swapNightShift(int randomInt, boolean randomBool1, boolean randomBool2) {
+		System.out.println("swapNightShift");
 		//TODO: rekening houden met die eerste dagen
 		// 		-> als de history het nodig acht dat er in het begin nachtshifts zijn mag je die niet uitzetten.
 		//TODO: nightshifts mogen optreden aan het einde van de periode ook & moeten hiet niet per se hun volledige periode uitzitten.
@@ -539,9 +817,15 @@ public class Solution {
 	}
 	
 	public void addMachineOrder(int randomInt1, int randomInt2) {
+		System.out.println("addMachineOrder");
 		//create a random machineOrder with size == 1 & add it to the end.
 		//TODO: is het beter om hier direct meerdere blokken toe te voegen? hmmm...
-		ProductionOrder po = new ProductionOrder(randomInt1 % this.problem.getItems().length, randomInt2 % this.problem.amountOfMachines(), 1);
+		randomInt1 = Math.abs(randomInt1);
+		randomInt2 = Math.abs(randomInt2);
+		int machine = randomInt2 % this.problem.amountOfMachines();
+		//System.out.println("Amount of machines: " + this.problem.amountOfMachines());
+		//System.out.println(randomInt2 % this.problem.amountOfMachines() + ", " + machine);
+		ProductionOrder po = new ProductionOrder(randomInt1 % this.problem.getItems().length, machine, 1);
 		this.orders.add(po);
 	}
 	
@@ -569,7 +853,7 @@ public class Solution {
 	}
 
 	public void swapOrders(int randomInt1, int randomInt2) {
-
+		System.out.println("swapOrders");
 		//indien geen productionorders => vervangen door add
 		if (orders.isEmpty() || orders.size() == 1)
 			addMachineOrder(randomInt1, randomInt2);
@@ -586,7 +870,7 @@ public class Solution {
 	}
 	
 	public void changeMachineForOrders(int randomInt1, int randomInt2) {
-
+		System.out.println("changeMachineForOrders");
 		//indien geen productionorders zijn => vervangen door add
 		if (orders.isEmpty())
 			addMachineOrder(randomInt1, randomInt2);
@@ -597,6 +881,7 @@ public class Solution {
 	}
 	
 	public void changeItemForOrder(int randomInt1, int randomInt2) {
+		System.out.println("changeItemForOrders");
 		//indien geen productionorders zijn => vervangen door add
 		if (orders.isEmpty())
 			addMachineOrder(randomInt1, randomInt2);
@@ -608,12 +893,13 @@ public class Solution {
 	
 	//wissel 2 requests van plaats in array
 	public void swapRequestOrder(int randomInt1, int randomInt2) {
+		System.out.println("swapRequestOrder");
 		int index1 = randomInt1%problem.getRequests().length;
 		int index2 = randomInt2%problem.getRequests().length;
 
 		//zelfde index => nieuw random getal
 		while (index1 == index2) {
-			index2 = new Random().nextInt() % problem.getRequests().length;
+			index2 = Math.abs(new Random().nextInt()) % problem.getRequests().length;
 		}
 
 		Request[] requests = problem.getRequests();
@@ -662,7 +948,7 @@ public class Solution {
 			for (int m = 0; m < horizon[dayIndex].getJobs().length; m++) {
 				for (int j = 0; j < duration; j++) {
 					Job job = horizon[dayIndex].getJobs()[m][i + j];
-					if (!job.equals(new Idle())) {
+					if (!new Idle().equals(job)) {
 						possible = false;
 						break;
 					}
@@ -729,7 +1015,28 @@ public class Solution {
 		if (dayIndex == this.horizon.length - 1) return;
 		calculateStock(dayIndex + 1, thisDay.stock);
 	}
-
+	//This method increase days until no duplicate changeover
+	public void searchDayWithoutSameChangeover(Changeover co, int currentDay, int currentBlock) throws Exception{		
+		boolean foundDayForChangeover = false; //check if changeover already occurs on this day
+		while(!foundDayForChangeover) {	
+			foundDayForChangeover = true;
+			for(int b=0;b<problem.getBlocksPerDay();b++) {
+				for(int m=0;m<problem.getMachines().length;m++) {
+					if(new Changeover(0,1).equals(horizon[currentDay].jobs[m][b])) {
+						if(co.isSame((Changeover) horizon[currentDay].jobs[m][b])) {
+							currentDay++;
+							currentBlock = 0;
+							if(currentDay>=horizon.length) {
+								throw new Exception();
+							}								
+							foundDayForChangeover = false;
+						}
+					}
+				}
+			}
+			
+		}
+	}
 	public void write(String filename) {
 		try {
 			FileWriter fileWriter = new FileWriter(filename);

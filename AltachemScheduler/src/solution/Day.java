@@ -7,7 +7,7 @@ import model.Request;
 
 public class Day {
 	// Jobs[i][j] : de job die uitgevoegd wordt door machine i op tijdstip j;
-	Job[][] jobs;
+	public Job[][] jobs;
 
 	boolean parallelwerk;
 	boolean nachtshift;
@@ -37,7 +37,9 @@ public class Day {
 	public Job[][] getJobs() {
 		return jobs;
 	}
-
+	public void setJob(Job job, int machine, int block) {
+		jobs[machine][block] = job;
+	}
 	public void setJobs(Job[][] jobs) {
 		this.jobs = jobs;
 	}

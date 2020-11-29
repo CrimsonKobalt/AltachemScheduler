@@ -36,7 +36,7 @@ public class ProductionOrder {
 	}
 
 	public int getMachineId() {
-		return this.itemId;
+		return this.machineId;
 	}
 	
 	public void setMachineId(int Id) {

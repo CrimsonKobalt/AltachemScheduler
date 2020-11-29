@@ -52,7 +52,12 @@ public class AltachemSolver {
 			solution.executeRandomSwap();
 			
 			//compile and recalculate
-			solution.constructSchedule();
+			try {
+				solution.constructSchedule();
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			
 			try {
 				solution.evaluate();

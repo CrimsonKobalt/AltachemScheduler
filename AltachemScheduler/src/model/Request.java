@@ -15,7 +15,9 @@ public class Request {
 	public void setShippingDays(boolean[] canBeShipped) {
 		this.shippingDays = canBeShipped;
 	}
-	
+	public boolean isShippingDay(int day) {
+		return shippingDays[day];
+	}
 	public Request(int i) {
 		this.requestId = i;
 	}

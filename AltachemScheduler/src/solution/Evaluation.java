@@ -56,7 +56,7 @@ public class Evaluation {
 			if(extraNightShiftsToPay >= solution.horizon.length) {
 				System.out.println("Gemene input: minAantalConsecutiveNightShifts > horizon.length");
 			}
-			for(int i=0; i<count; i++) {
+			for(int i=1; i<count; i++) {
 				if(solution.horizon[solution.horizon.length-i].nachtshift) {
 					extraNightShiftsToPay--;
 				} else {
@@ -79,6 +79,7 @@ public class Evaluation {
 		
 		Evaluation.itemRevenue = new double[problem.getItems().length];	
 		Evaluation.minStock = new int[problem.getItems().length];
+		Evaluation.maxStock = new int[problem.getItems().length];
 		for(int i=0; i<itemRevenue.length; i++) {
 			Evaluation.itemRevenue[i] = problem.getItems()[i].getCostPerItem();
 			Evaluation.minStock[i] = problem.getItems()[i].getMinAllowedInStock();

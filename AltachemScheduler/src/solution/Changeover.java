@@ -34,6 +34,9 @@ public class Changeover extends Job {
 			return false;
 		}
 	}
+	public boolean isChangeover(Job job) {
+		return this.getClass()==job.getClass();
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
