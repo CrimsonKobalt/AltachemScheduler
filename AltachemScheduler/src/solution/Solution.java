@@ -63,6 +63,9 @@ public class Solution {
 		this.problem = solution.problem;
 		//define the horizon
 		this.horizon = new Day[solution.horizon.length];
+		for(int i=0; i<this.horizon.length; i++) {
+			this.horizon[i] = new Day(problem.amountOfMachines(), problem.getBlocksPerDay(), problem.getItems().length);
+		}
 
 		//remember the previously decided order of items to be produced (block per block)
 		this.orders = new ArrayList<ProductionOrder>();
