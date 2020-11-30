@@ -53,12 +53,12 @@ public class AltachemSolver {
 			
 			double currentCost = bestSolution.getTempCost();
 			
+			//bestSolution.printSchedule();
 			//copy the old solution
 			solution = new Solution(bestSolution);
 			
 			//move
-			Random random = new Random();
-			solution.addMachineOrder(random.nextInt(), random.nextInt());
+			solution.executeRandomSwap();
 			
 			//compile and recalculate
 			try {
@@ -66,7 +66,11 @@ public class AltachemSolver {
 			} catch (ScheduleException se) {
 				idle++;
 				se.printStackTrace();
+				continue;
 			}
+			
+			//System.out.println("before evaluation...");
+			//bestSolution.printSchedule();
 			
 			try {
 				solution.evaluateIntermediateSolution();
@@ -76,18 +80,17 @@ public class AltachemSolver {
 				continue;
 			}
 			
+			//System.out.println("post evaluation...");
+			//solution.printSchedule();
+			
 			double newCost = solution.getTempCost();
 			
 			// [meta] accept? -----------------------------------
 			if(newCost < currentCost || newCost < bound) {
-				System.out.println("newCost:" + newCost);
-				System.out.println("currentCost: " + currentCost);
 				idle = 0;
-				System.out.println("bestCost: " + bestSolution.getTempCost());
 				if(solution.getTempCost() < bestSolution.getTempCost()) {
 					bestSolution = solution;
 					listener.improved(bestSolution);
-					continue;
 				}
 			} else {
 				idle++;
@@ -109,6 +112,8 @@ public class AltachemSolver {
 		}
 		
 		//finished ----------------------------------------------
+		
+		bestSolution.printSchedule();
 		
 		return bestSolution;
 	}

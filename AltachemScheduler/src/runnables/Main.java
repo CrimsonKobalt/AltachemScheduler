@@ -26,7 +26,7 @@ public class Main {
 		
 		System.out.println("Done solving... finishing up main-class & printing output-file...");
 		if(solution == null) {
-			return;
+			System.out.println("null returned from solver...");
 		}
 		
 		try {
@@ -35,6 +35,8 @@ public class Main {
 			e.printStackTrace();
 			System.out.println("Error evaluating function: overstockException caught: this should never be able to be thrown though.");
 		}
+		
+		solution.printSchedule();
 		
 		solution.write(outputFilename);
 	}

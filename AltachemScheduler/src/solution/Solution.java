@@ -86,7 +86,7 @@ public class Solution {
 		}
 
 		//schedule the maintenances...
-		solution.scheduleMaintenances(problem);
+		this.scheduleMaintenances(problem);
 
 		//remember the decisions previously made: these can now potentially be changed.
 		for (int i = 0; i < this.horizon.length; i++) {
@@ -304,7 +304,7 @@ public class Solution {
 						//Do nothing
 					}else {
 						horizon[currentDay].setJob(co, po.getMachineId(), b);
-						System.out.println(horizon[currentDay].jobs[po.getMachineId()][b]);
+						//System.out.println(horizon[currentDay].jobs[po.getMachineId()][b]);
 					}					
 				}					
 				//start producing
@@ -315,7 +315,7 @@ public class Solution {
 						if(new Idle().equals(horizon[currentDay].jobs[currentMachine][currentBlock])) {
 							blocksProduced++;
 							horizon[currentDay].setJob(new Production(po.getItemId()), currentMachine, currentBlock);
-							System.out.println(horizon[currentDay].jobs[currentMachine][currentBlock]);
+							//System.out.println(horizon[currentDay].jobs[currentMachine][currentBlock]);
 						}else {
 							//Do nothing
 						}
@@ -388,13 +388,22 @@ public class Solution {
 					}
 				}
 			}
-			
+	}
+	
+	public void printSchedule() {
+		for(int i=0; i<this.horizon.length; i++) {
+			Day d = this.horizon[i];
+			System.out.println("#Day " + i);
+			for(int b=0; b<this.problem.getBlocksPerDay(); b++) {
+				System.out.println(b + "; " + d.jobs[0][b] + "; "+d.jobs[1][b]);
+			}
+		}
 	}
 	
 	//START SWAPS
 	public void executeRandomSwap() {
 		Random random = new Random();
-		int randomInt = random.nextInt(9);
+		int randomInt = random.nextInt(15);
 		int randPosInt = random.nextInt();
 		randPosInt = Math.abs(randPosInt);
 		int randPosInt2 = random.nextInt();
@@ -404,7 +413,7 @@ public class Solution {
 
 		switch (randomInt){
 			case 0: swapParallelWork(randPosInt); break;
-			case 1: this.addMachineOrder(randPosInt, randPosInt2); break;
+			case 1: this.swapNightShift(randPosInt, random.nextBoolean(), random.nextBoolean());
 			case 2: swapOvertime(randPosInt, randPosInt2); break;
 			case 3: swapOrders(randPosInt, randPosInt2); break;
 			case 4: swapRequestOrder(randPosInt, randPosInt2); break;
@@ -412,6 +421,12 @@ public class Solution {
 			case 6: decrementOrderCount(randPosInt); break;
 			case 7: changeMachineForOrders(randPosInt, randPosInt2); break;
 			case 8: changeItemForOrder(randPosInt, randPosInt2); break;
+			case 9: this.addMachineOrder(randPosInt, randPosInt2); break;
+			case 10: this.addMachineOrder(randPosInt, randPosInt2); break;
+			case 11: incrementOrderCount(randPosInt); break;
+			case 12: incrementOrderCount(randPosInt); break;
+			case 13: decrementOrderCount(randPosInt); break;
+			case 14: decrementOrderCount(randPosInt); break;
 			default: break;
 		}
 		
@@ -447,8 +462,13 @@ public class Solution {
 
 			//controleer waar bestaande night shift begint en eindigt
 			int startNightshift = index;
-			while(horizon[startNightshift].isNachtshift() && startNightshift >= 0)
+			while(horizon[startNightshift].isNachtshift() && startNightshift >= 0) {
+				//toegevoegd door christophe voor temp fix. Fix dit eens man
+				if(startNightshift == 0) {
+					break;
+				}
 				startNightshift--;
+			}
 			startNightshift++;
 
 			//TODO: wat indien night shift doorlopen na horizon
