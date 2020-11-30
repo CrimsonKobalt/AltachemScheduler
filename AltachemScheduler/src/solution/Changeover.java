@@ -35,7 +35,7 @@ public class Changeover extends Job {
 		}
 	}
 	public boolean isChangeover(Job job) {
-		return this.getClass()==job.getClass();
+		return this.getClass().equals(job.getClass());
 	}
 	@Override
 	public int hashCode() {

@@ -15,5 +15,4 @@ public class Idle extends Job {
 	public boolean equals(Job job) {
 		return this.getClass().equals(job.getClass());
 	}
-
 }
