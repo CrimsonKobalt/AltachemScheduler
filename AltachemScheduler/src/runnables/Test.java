@@ -1,9 +1,11 @@
 package runnables;
 
 import model.Problem;
+import solution.Evaluation;
 import solution.Idle;
 import solution.Job;
 import solution.Maintenance;
+import solution.OverStockException;
 import solution.Production;
 import solution.Solution;
 
@@ -18,27 +20,35 @@ public class Test {
 	public static void main(String[] args) {
 
         List<String> filenames = new ArrayList<>();
-        filenames.add("src/examples/toy_inst.txt");
-        filenames.add("src/examples/A_10_10_30.txt");
-        filenames.add("src/examples/A_10_10_60.txt");
-        filenames.add("src/examples/A_10_15_30.txt");
-        filenames.add("src/examples/A_10_15_60.txt");
-        filenames.add("src/examples/A_20_15_30.txt");
-        filenames.add("src/examples/A_20_15_60.txt");
-        filenames.add("src/examples/A_20_25_30.txt");
-        filenames.add("src/examples/A_20_25_60.txt");
-        filenames.add("src/examples/A_40_100_30.txt");
-        filenames.add("src/examples/A_40_100_60.txt");
+        filenames.add("toy_inst.txt");
+        filenames.add("A_10_10_30.txt");
+        filenames.add("A_10_10_60.txt");
+        filenames.add("A_10_15_30.txt");
+        filenames.add("A_10_15_60.txt");
+        filenames.add("A_20_15_30.txt");
+        filenames.add("A_20_15_60.txt");
+        filenames.add("A_20_25_30.txt");
+        filenames.add("A_20_25_60.txt");
+        filenames.add("A_40_100_30.txt");
+        filenames.add("A_40_100_60.txt");
 
         for (String filename : filenames){
-            String outputFilename = filename.substring(0, filename.length()-4) + "_sol.txt";
-            Problem problem = new Problem(filename);
+        	String filepath = "src/examples/" + filename;
+            String outputFilename = "src/foundresults/"+ filename.substring(0, filename.length()-4) + "_sol.txt";
+            Problem problem = new Problem(filepath);
+            Evaluation.configureEvaluation(problem);
             Solution solution = Solution.CreateInitialSolution(problem);
+            try {
+				solution.evaluate();
+			} catch (OverStockException e) {
+				e.printStackTrace();
+			}
+            
             solution.write(outputFilename);
 
             // check with validator
             try{
-                    System.out.println(run("java", "-jar", "src/examples/AspValidator.jar", "-i", filename, "-s", outputFilename));
+                    System.out.println(run("java", "-jar", "src/examples/AspValidator.jar", "-i", filepath, "-s", outputFilename));
                     // + " -l src/examples/validatorOutput.txt"
 
             }catch (IOException ioException){

@@ -61,6 +61,7 @@ public class Evaluation {
 					break;
 				}
 			}
+			System.out.println("adding nightshift pay...");
 			result += extraNightShiftsToPay * Evaluation.nightshiftCost;
 		}
 		
