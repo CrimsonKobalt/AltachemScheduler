@@ -10,7 +10,7 @@ import model.Problem;
 import model.Request;
 
 public class Solution {
-	Day[] horizon;
+	Day[] horizon;//
 
 	//identiek aan het probleem: dit is gewoon info: hier dient niet aan verandert te worden.
 	//deze worden letterlijk gekopieerd.
@@ -55,8 +55,6 @@ public class Solution {
 		for(int i=0; i<problem.getRequests().length; i++) {
 			solution.requestOrder.add(problem.getRequests()[i]);
 		}
-		
-		solution.calculateStock();
 
 		return solution;
 	}
