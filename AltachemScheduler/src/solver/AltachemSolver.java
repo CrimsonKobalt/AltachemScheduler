@@ -1,6 +1,7 @@
 package solver;
 
 import model.Problem;
+import solution.Evaluation;
 import solution.OverStockException;
 import solution.ScheduleException;
 import solution.Solution;
@@ -16,6 +17,8 @@ public class AltachemSolver {
 	public Solution solve(Problem problem) {
 		Solution bestSolution = null;
 		Solution solution = null;
+		
+		Evaluation.configureEvaluation(problem);
 		
 		//meta settings -----------------------------------------
 		

@@ -1,5 +1,5 @@
 Instance_name: toy_inst
-Cost: 93769.80
+Cost: 93469.80
 #Day 0
 0;IDLE;IDLE
 1;IDLE;IDLE
@@ -28,7 +28,7 @@ Cost: 93769.80
 #Shipped request ids
 -1
 #Night shift
-1
+0
 #Day 1
 0;IDLE;IDLE
 1;IDLE;IDLE

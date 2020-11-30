@@ -125,7 +125,7 @@ public class Evaluation {
 		if(r != null) {
 			//zoek de laatst mogelijke shippingdag
 			int dayIndex = 0;
-			for(int i=solution.horizon.length; i>=0; i++) {
+			for(int i=solution.horizon.length-1; i>=0; i++) {
 				if(r.isShippingDay(i)) {
 					dayIndex = i;
 					break;

@@ -13,8 +13,9 @@ public class Main {
 
 	public static void main(String[] args) {
 		
-		String filename = "src/examples/toy_inst.txt";
-		String outputFilename = filename.substring(0, filename.length()-4) + "_sol.txt";
+		String instanceName = "toy_inst.txt";
+		String filename = "src/examples/" + instanceName;
+		String outputFilename = "src/foundresults/" + instanceName.substring(0, filename.length()-4) + "_sol.txt";
 		
 		Problem problem = new Problem(filename);
 		

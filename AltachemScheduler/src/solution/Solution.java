@@ -93,6 +93,11 @@ public class Solution {
 			this.horizon[i].parallelwerk = solution.horizon[i].parallelwerk;
 		}
 		
+		this.requestOrder = new ArrayList<>();
+		for(Request req : solution.requestOrder) {
+			this.requestOrder.add(req);
+		}
+		
 		this.cost = Double.MAX_VALUE;
 		this.tempCost = Double.MAX_VALUE;
 	}
