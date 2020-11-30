@@ -24,6 +24,8 @@ public class Solution {
 	
 	//calculated cost
 	private double cost;
+	//calculated cost -- intermediate
+	private double tempCost;
 
 	public static Solution CreateInitialSolution(Problem problem) {
 		Solution solution = new Solution();
@@ -47,6 +49,7 @@ public class Solution {
 		}
 		
 		solution.cost = Double.MAX_VALUE;
+		solution.tempCost = Double.MAX_VALUE;
 		
 		solution.requestOrder = new ArrayList<>();
 		for(int i=0; i<problem.getRequests().length; i++) {
@@ -91,9 +94,10 @@ public class Solution {
 		}
 		
 		this.cost = Double.MAX_VALUE;
+		this.tempCost = Double.MAX_VALUE;
 	}
 	
-	public void constructSchedule() throws Exception {
+	public void constructSchedule() throws ScheduleException {
 		//TODO: 1) construct schedule
 		//TODO: 2) gebruik die calculateStock() functie
 		//TODO: 3) overloop de requests in requestOrder en probeer ze zo vroeg mogelijk te shippen.
@@ -156,7 +160,7 @@ public class Solution {
 							startBlock = 0; 
 							consecutiveBlocks = 0;
 							if(currentDay>=horizon.length) {
-								throw new Exception();
+								throw new ScheduleException();
 							}
 							maintenanceBlocks.clear();
 						}else if(currentBlock>=problem.getBlocksPerDay() && horizon[currentDay].isNachtshift()) {
@@ -165,7 +169,7 @@ public class Solution {
 							startBlock = 0; 
 							consecutiveBlocks = 0;
 							if(currentDay>=horizon.length) {
-								throw new Exception();
+								throw new ScheduleException();
 							}
 							searchDayWithoutSameChangeover(co, currentDay, currentBlock);
 							maintenanceBlocks.clear();
@@ -198,7 +202,7 @@ public class Solution {
 							currentBlock = 0;
 							currentDay++;
 							if(currentDay>=horizon.length) {
-								throw new Exception();
+								throw new ScheduleException();
 							}
 							searchDayWithoutSameChangeover(co, currentDay, currentBlock);
 							startBlock = 0; 
@@ -208,7 +212,7 @@ public class Solution {
 							currentBlock = 0;
 							currentDay++;
 							if(currentDay>=horizon.length) {
-								throw new Exception();
+								throw new ScheduleException();
 							}
 							searchDayWithoutSameChangeover(co, currentDay, currentBlock);
 							startBlock = 0;
@@ -268,7 +272,7 @@ public class Solution {
 							currentDay++;
 							searchDayWithoutSameChangeover(co, currentDay, currentBlock);
 							if(currentDay>=horizon.length) {
-								throw new Exception();
+								throw new ScheduleException();
 							}
 							startBlock = 0; 
 							consecutiveBlocks = 0;
@@ -278,7 +282,7 @@ public class Solution {
 							currentDay++;
 							searchDayWithoutSameChangeover(co, currentDay, currentBlock);
 							if(currentDay>=horizon.length) {
-								throw new Exception();
+								throw new ScheduleException();
 							}
 							startBlock = 0;
 							consecutiveBlocks = 0;
@@ -328,13 +332,13 @@ public class Solution {
 						currentBlock = 0;
 						currentDay++;
 						if(currentDay>=horizon.length) {
-							throw new Exception();
+							throw new ScheduleException();
 						}
 					}else if(currentBlock>=problem.getBlocksPerDay() && horizon[currentDay].isNachtshift()) {
 						currentBlock = 0;
 						currentDay++;
 						if(currentDay>=horizon.length) {
-							throw new Exception();
+							throw new ScheduleException();
 						}
 					}
 				}
@@ -648,11 +652,12 @@ public class Solution {
 		}
 		return scheduleMaintenance(horizon, machineIndex, dayIndex - 1, duration, techStart, techStop);
 	}
+	
+	public void configureEvaluation(Problem problem) {
+		Evaluation.configureEvaluation(problem);
+	}
 
-	//calls the calculateStock() function: this recalculates the stock levels. If this is unwanted, please remove.
 	public double evaluate() throws OverStockException{
-		this.calculateStock();
-		Evaluation.configureEvaluation(this.problem);
 		this.cost = Evaluation.calculateObjectiveFunction(this);
 		return this.cost;
 	}
@@ -662,6 +667,19 @@ public class Solution {
 			System.out.println("encoutered situation where cost has not been calculated...");
 		} 
 		return this.cost;
+	}
+	
+	//tempCost!
+	public double evaluateIntermediateSolution() throws OverStockException {
+		this.tempCost = Evaluation.calculateIntermediateObjectiveFunction(this);
+		return this.tempCost;
+	}
+	
+	public double getTempCost() {
+		if(this.tempCost == Double.MAX_VALUE) {
+			System.out.println("tempCost has not yet been calculated...");
+		}
+		return this.tempCost;
 	}
 
 	//can be ignored if stock is kept another way.
@@ -700,7 +718,7 @@ public class Solution {
 		calculateStock(dayIndex + 1, thisDay.stock);
 	}
 	//This method increase days until no duplicate changeover
-	public void searchDayWithoutSameChangeover(Changeover co, int currentDay, int currentBlock) throws Exception{		
+	public void searchDayWithoutSameChangeover(Changeover co, int currentDay, int currentBlock) throws ScheduleException{		
 		boolean foundDayForChangeover = false; //check if changeover already occurs on this day
 		while(!foundDayForChangeover) {	
 			foundDayForChangeover = true;
@@ -711,7 +729,7 @@ public class Solution {
 							currentDay++;
 							currentBlock = 0;
 							if(currentDay>=horizon.length) {
-								throw new Exception();
+								throw new ScheduleException();
 							}								
 							foundDayForChangeover = false;
 						}
@@ -721,6 +739,7 @@ public class Solution {
 			
 		}
 	}
+	
 	public void write(String filename) {
 		try {
 			FileWriter fileWriter = new FileWriter(filename);

@@ -90,4 +90,9 @@ public class Evaluation {
 	public static double getResult(){
 		return Evaluation.value;
 	}
+
+	public static double calculateIntermediateObjectiveFunction(Solution solution) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }
