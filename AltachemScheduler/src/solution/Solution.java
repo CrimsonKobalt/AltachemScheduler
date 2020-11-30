@@ -425,7 +425,9 @@ public class Solution {
 		//use the timehorizon.length & randomInt1 to choose a day
 		//use randomInt2 to select how many hours of overtime to schedule (using the startOfOvertime/endOfOvertime indices)
 		int maxUrenOvertime = this.problem.getLastOvertimeIndex() - this.problem.getLastDayShiftIndex();
-		this.horizon[randomInt1 % this.horizon.length].setOvertime(randomInt2 % maxUrenOvertime);
+		if(!horizon[randomInt1 % this.horizon.length].nachtshift) { //random dag mag geen nightshift zijn
+			this.horizon[randomInt1 % this.horizon.length].setOvertime(randomInt2 % maxUrenOvertime);
+		}		
 	}
 	
 	public void swapNightShift(int randomInt, boolean randomBool1, boolean randomBool2) {
@@ -459,21 +461,35 @@ public class Solution {
 			if (randomBool1){
 
 				//indien voorraan toevoegen enige mogelijkheid
-				if (endNightshift == horizon.length-1 && startNightshift > 0)
+				if (endNightshift == horizon.length-1 && startNightshift > 0) {
 					horizon[startNightshift-1].setNachtshift(true);
+					horizon[startNightshift-1].setOvertime(0);
+				}
+					
+				
 
 				//indien achteraan toevoegen enige mogelijkheid
-				else if (startNightshift == 0 && endNightshift < horizon.length-1)
+				else if (startNightshift == 0 && endNightshift < horizon.length-1) {
 					horizon[endNightshift+1].setNachtshift(true);
+					horizon[endNightshift+1].setOvertime(0);
+				}
+					
 
 				//voorraan en achteraan toevoegen is mogelijk
 				//voorraan toevoegen
-				else if (randomBool2)
+				else if (randomBool2) {
 					horizon[startNightshift-1].setNachtshift(true);
+					horizon[startNightshift-1].setOvertime(0);
+				}
+					
+				
 
 				//achteraan toevoegen
-				else
+				else {
 					horizon[endNightshift+1].setNachtshift(true);
+					horizon[endNightshift+1].setOvertime(0);
+				}
+					
 
 			}
 
@@ -506,6 +522,7 @@ public class Solution {
 				if (index+i >= horizon.length)
 					break;
 				this.horizon[index+i].setNachtshift(true);
+				this.horizon[index+i].setOvertime(0);
 			}
 
 		}
