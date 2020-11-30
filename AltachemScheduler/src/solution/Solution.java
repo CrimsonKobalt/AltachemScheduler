@@ -479,15 +479,17 @@ public class Solution {
 				if (consecutiveNightshifts == 10){
 					//alles verwijderen
 					for (int i=startNightshift; i<=endNightshift; i++)
-						horizon[i].setNachtshift(false);
-
+						if(!isSteadyNightshift(i)) {
+							horizon[i].setNachtshift(false);
+						}
+						
 				}
 				else{
 					//enkel eerste dag verwijderen
-					if (randomBool2)
+					if (randomBool2 && !isSteadyNightshift(startNightshift))
 						horizon[startNightshift].setNachtshift(false);
 					//enkel laatste dag verwijderen
-					else
+					else if(!isSteadyNightshift(endNightshift))
 						horizon[endNightshift].setNachtshift(false);
 				}
 			}
@@ -768,5 +770,17 @@ public class Solution {
 	}
 	public Day[] getHorizon() {
 		return horizon;
+	}
+	public boolean isSteadyNightshift(int dayIndex) {
+		if(problem.getPastConsecutiveNightShifts()>0) {
+			int remainingNS = problem.getMinimumConsecutiveNightShifts() - problem.getPastConsecutiveNightShifts();
+			if(remainingNS > dayIndex) {
+				return true;
+			}else {
+				return false;
+			}
+		}else {
+			return false;
+		}
 	}
 }
