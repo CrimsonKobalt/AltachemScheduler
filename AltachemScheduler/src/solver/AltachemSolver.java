@@ -29,14 +29,15 @@ public class AltachemSolver {
 		
 		solution = Solution.CreateInitialSolution(problem);
 		try {
-			//solution.evaluate();
-			solution.evaluateIntermediateSolution();
+			System.out.println("solution.evaluate(): " + solution.evaluate());
+			System.out.println("solution.evaluateIntermediateSolution: " + solution.evaluateIntermediateSolution());
+			return solution;
 		} catch (OverStockException e1) {
 			System.err.println("initial solution cannot be constructed due to stock-overflow.");
-			return null;
 		}
 		bestSolution = solution;
 		listener.improved(bestSolution);
+		
 		
 		// [meta] init ------------------------------------------
 		

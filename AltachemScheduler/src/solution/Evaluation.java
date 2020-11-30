@@ -119,7 +119,9 @@ public class Evaluation {
 		Request r = null;
 		for(Request req: solution.requestOrder) {
 			if(!shippedRequests.contains(req)) {
+				System.out.println("we get to this point!");
 				r = req;
+				break;
 			}
 		}
 		if(r != null) {
@@ -127,6 +129,7 @@ public class Evaluation {
 			int dayIndex = 0;
 			for(int i=solution.horizon.length-1; i>=0; i++) {
 				if(r.isShippingDay(i)) {
+					System.out.println("final shipping day found");
 					dayIndex = i;
 					break;
 				}
@@ -134,6 +137,7 @@ public class Evaluation {
 			//trek van de cost af:
 				//voor elk item dat nodig is voor de request te kunnen verschepen, de hoeveelheid in stock op die dag * de revenue per item voor dat item.
 			for(int itemId = 0; itemId < r.getAmountsRequested().length; itemId++) {
+				System.out.println("subtracting: " + solution.horizon[dayIndex].stock[itemId] * Evaluation.itemRevenue[itemId]);
 				result -= ( solution.horizon[dayIndex].stock[itemId] * Evaluation.itemRevenue[itemId] );
 			}
 		}
