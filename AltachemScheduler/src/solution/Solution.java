@@ -518,7 +518,7 @@ public class Solution {
 		else{
 			//TODO: gekozen dag is al random, extra random nodig om beginnen toe te voegen van x dagen voor deze dag?
 			//voeg 10 dagen night shift toe vanaf huidige dag
-			for (int i=0; i < problem.getMinimumConsecutiveNightShifts(); i++){
+			for (int i=0; i < problem.getMinimumConsecutiveNightShifts(); i++){ //changed
 				if (index+i >= horizon.length)
 					break;
 				this.horizon[index+i].setNachtshift(true);
