@@ -16,8 +16,6 @@ public class Evaluation {
 	private static int[] minStock;
 	private static int[] maxStock;
 	
-	private static double value = Double.MAX_VALUE;
-	
 	public static double calculateObjectiveFunction(Solution solution) throws OverStockException{
 		double result = 0;
 		List<Request> shippedRequests = new ArrayList<>();
@@ -67,7 +65,6 @@ public class Evaluation {
 		}
 		
 		//done
-		Evaluation.value = result;
 		return result;
 	}
 	
@@ -86,13 +83,79 @@ public class Evaluation {
 			Evaluation.maxStock[i] = problem.getItems()[i].getMaxAllowedInStock();
 		}
 	}
-	
-	public static double getResult(){
-		return Evaluation.value;
-	}
 
-	public static double calculateIntermediateObjectiveFunction(Solution solution) {
-		// TODO Auto-generated method stub
-		return 0;
+	public static double calculateIntermediateObjectiveFunction(Solution solution) throws OverStockException{
+		double result = 0;
+		List<Request> shippedRequests = new ArrayList<>();
+		
+		for(Day d: solution.horizon) {
+			//add night shift cost
+			if(d.nachtshift) result += Evaluation.nightshiftCost;
+			//add parallel cost
+			if(d.parallelwerk) result += Evaluation.parallelCost;
+			//add overtime cost
+			if(d.overtime > 0) result += (d.overtime * Evaluation.overtimeBlockCost);
+			//add stock cost
+			for(int i=0; i<d.stock.length; i++) {
+				if(d.stock[i] < minStock[i]) result += Evaluation.underStockPenaltyCost;
+				if(d.stock[i] > maxStock[i]) throw new OverStockException();
+			}
+			//add requests to shippedRequests if they have been shipped
+			for(Request r : d.shippedToday) {
+				shippedRequests.add(r);
+			}
+		}
+		
+		//add unshipped requests cost
+		for(Request r: solution.problem.getRequests()) {
+			if(!shippedRequests.contains(r)) {
+				for(int itemId = 0; itemId < r.getAmountsRequested().length; itemId++) {
+					result += (r.getAmountsRequested()[itemId] * itemRevenue[itemId]);
+				}
+			}	
+		}
+		
+		//look how close we came to fullfilling the first unfullfilled order.
+		Request r = null;
+		for(Request req: solution.requestOrder) {
+			if(!shippedRequests.contains(req)) {
+				r = req;
+			}
+		}
+		if(r != null) {
+			//zoek de laatst mogelijke shippingdag
+			int dayIndex = 0;
+			for(int i=solution.horizon.length; i>=0; i++) {
+				if(r.isShippingDay(i)) {
+					dayIndex = i;
+					break;
+				}
+			}
+			//trek van de cost af:
+				//voor elk item dat nodig is voor de request te kunnen verschepen, de hoeveelheid in stock op die dag * de revenue per item voor dat item.
+			for(int itemId = 0; itemId < r.getAmountsRequested().length; itemId++) {
+				result -= ( solution.horizon[dayIndex].stock[itemId] * Evaluation.itemRevenue[itemId] );
+			}
+		}
+		
+		//check for not-full nightshifts
+		if(solution.horizon[solution.horizon.length - 1].nachtshift) {
+			int extraNightShiftsToPay = solution.problem.getMinimumConsecutiveNightShifts();
+			int count = extraNightShiftsToPay;
+			if(extraNightShiftsToPay >= solution.horizon.length) {
+				System.out.println("minAantalConsecutiveNightShifts > horizon.length");
+			}
+			for(int i=1; i<count; i++) {
+				if(solution.horizon[solution.horizon.length-i].nachtshift) {
+					extraNightShiftsToPay--;
+				} else {
+					break;
+				}
+			}
+			result += extraNightShiftsToPay * Evaluation.nightshiftCost;
+		}
+		
+		//done
+		return result;
 	}
 }

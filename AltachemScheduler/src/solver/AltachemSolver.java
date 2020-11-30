@@ -2,6 +2,7 @@ package solver;
 
 import model.Problem;
 import solution.OverStockException;
+import solution.ScheduleException;
 import solution.Solution;
 
 public class AltachemSolver {
@@ -25,7 +26,8 @@ public class AltachemSolver {
 		
 		solution = Solution.CreateInitialSolution(problem);
 		try {
-			solution.evaluate();
+			//solution.evaluate();
+			solution.evaluateIntermediateSolution();
 		} catch (OverStockException e1) {
 			System.err.println("initial solution cannot be constructed due to stock-overflow.");
 			return null;
@@ -37,13 +39,13 @@ public class AltachemSolver {
 		
 		int idle = 0;
 		int count = 0;
-		double bound = solution.getCost();
+		double bound = solution.getTempCost();
 		
 		//loop --------------------------------------------------
 		
 		while(true) {
 			
-			double currentCost = bestSolution.getCost();
+			double currentCost = bestSolution.getTempCost();
 			
 			//copy the old solution
 			solution = new Solution(bestSolution);
@@ -54,26 +56,26 @@ public class AltachemSolver {
 			//compile and recalculate
 			try {
 				solution.constructSchedule();
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			} catch (ScheduleException se) {
+				idle++;
+				se.printStackTrace();
 			}
 			
 			try {
-				solution.evaluate();
+				solution.evaluateIntermediateSolution();
 			} catch (OverStockException e) {
 				idle++;
 				e.printStackTrace();
 				continue;
 			}
 			
-			double newCost = solution.getCost();
+			double newCost = solution.getTempCost();
 			
 			// [meta] accept? -----------------------------------
 			
 			if(newCost < currentCost || newCost < bound) {
 				idle = 0;
-				if(solution.getCost() < bestSolution.getCost()) {
+				if(solution.getTempCost() < bestSolution.getTempCost()) {
 					bestSolution = solution;
 					listener.improved(bestSolution);
 				}
@@ -86,7 +88,7 @@ public class AltachemSolver {
 			
 			count++;
 			if(count % L == 0) {
-				bound = bestSolution.getCost();
+				bound = bestSolution.getTempCost();
 			}
 			
 			//stop? ---------------------------------------------

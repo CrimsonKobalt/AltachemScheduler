@@ -3,6 +3,7 @@ package runnables;
 import java.io.File;
 
 import model.Problem;
+import solution.OverStockException;
 import solution.Solution;
 import solver.AltachemListener;
 import solver.AltachemListenerImpl;
@@ -21,6 +22,15 @@ public class Main {
 		AltachemSolver solver = new AltachemSolver(listener);
 		
 		Solution solution = solver.solve(problem);
+		
+		System.out.println("Done solving... finishing up main-class & printing output-file...");
+		
+		try {
+			solution.evaluate();
+		} catch (OverStockException e) {
+			e.printStackTrace();
+			System.out.println("Error evaluating function: overstockException caught: this should never be able to be thrown though.");
+		}
 		
 		solution.write(outputFilename);
 	}
