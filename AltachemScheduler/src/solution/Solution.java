@@ -462,11 +462,7 @@ public class Solution {
 
 			//controleer waar bestaande night shift begint en eindigt
 			int startNightshift = index;
-			while(horizon[startNightshift].isNachtshift() && startNightshift >= 0) {
-				//toegevoegd door christophe voor temp fix. Fix dit eens man
-				if(startNightshift == 0) {
-					break;
-				}
+			while(startNightshift >= 0 && horizon[startNightshift].isNachtshift()) {
 				startNightshift--;
 			}
 			startNightshift++;
@@ -540,15 +536,15 @@ public class Solution {
 		}
 		else{
 			//TODO: gekozen dag is al random, extra random nodig om beginnen toe te voegen van x dagen voor deze dag?
-			//voeg 10 dagen night shift toe vanaf huidige dag
+			//voeg minimum dagen night shift toe vanaf huidige dag
 			for (int i=0; i < problem.getMinimumConsecutiveNightShifts(); i++){
 				if (index+i >= horizon.length)
 					break;
 				this.horizon[index+i].setNachtshift(true);
 				this.horizon[index+i].setOvertime(0);
 			}
-
 		}
+
 	}
 	
 	public void addMachineOrder(int randomInt1, int randomInt2) {
