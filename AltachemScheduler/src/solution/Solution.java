@@ -55,6 +55,8 @@ public class Solution {
 		for(int i=0; i<problem.getRequests().length; i++) {
 			solution.requestOrder.add(problem.getRequests()[i]);
 		}
+		
+		solution.calculateStock();
 
 		return solution;
 	}
