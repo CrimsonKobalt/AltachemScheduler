@@ -497,7 +497,7 @@ public class Solution {
 			else{
 
 				//TODO: wat indien night shift doorlopen na horizon
-				if (consecutiveNightshifts == 10){
+				if (consecutiveNightshifts == problem.getMinimumConsecutiveNightShifts()){
 					//alles verwijderen
 					for (int i=startNightshift; i<=endNightshift; i++)
 						if(!isSteadyNightshift(i)) {
