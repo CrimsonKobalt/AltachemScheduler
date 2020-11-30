@@ -22,8 +22,8 @@ public class AltachemSolver {
 		
 		//meta settings -----------------------------------------
 		
-		int MAX_IDLE = 100000;
-		int L = 500;
+		int MAX_IDLE = 1000;
+		int L = 100;
 		
 		//initial solution --------------------------------------
 		
@@ -31,9 +31,9 @@ public class AltachemSolver {
 		try {
 			System.out.println("solution.evaluate(): " + solution.evaluate());
 			System.out.println("solution.evaluateIntermediateSolution: " + solution.evaluateIntermediateSolution());
-			return solution;
 		} catch (OverStockException e1) {
 			System.err.println("initial solution cannot be constructed due to stock-overflow.");
+			return null;
 		}
 		bestSolution = solution;
 		listener.improved(bestSolution);
