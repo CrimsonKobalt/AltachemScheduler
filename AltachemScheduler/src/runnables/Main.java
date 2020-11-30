@@ -25,6 +25,9 @@ public class Main {
 		Solution solution = solver.solve(problem);
 		
 		System.out.println("Done solving... finishing up main-class & printing output-file...");
+		if(solution == null) {
+			return;
+		}
 		
 		try {
 			solution.evaluate();

@@ -120,7 +120,7 @@ public class Evaluation {
 		Request r = null;
 		for(Request req: solution.requestOrder) {
 			if(!shippedRequests.contains(req)) {
-				System.out.println("we get to this point!");
+				//System.out.println("we get to this point!");
 				r = req;
 				break;
 			}
@@ -130,12 +130,12 @@ public class Evaluation {
 			int dayIndex = 0;
 			for(int i=solution.horizon.length-1; i>=0; i++) {
 				if(r.isShippingDay(i)) {
-					System.out.println("final shipping day found");
+					//System.out.println("final shipping day found");
 					dayIndex = i;
 					break;
 				}
 			}
-			System.out.println("Day " + dayIndex + ", request: " + r.getId());
+			//System.out.println("Day " + dayIndex + ", request: " + r.getId());
 			//trek van de cost af:
 				//voor elk item dat nodig is voor de request te kunnen verschepen, de hoeveelheid in stock op die dag * de revenue per item voor dat item.
 			for(int itemId = 0; itemId < r.getAmountsRequested().length; itemId++) {
@@ -145,8 +145,8 @@ public class Evaluation {
 				} else {
 					amountToSubtract = r.getAmountsRequested()[itemId];
 				}
-				System.out.println("subtracting: " + amountToSubtract * Evaluation.itemRevenue[itemId]);
-				result -= ( amountToSubtract * Evaluation.itemRevenue[itemId] );
+				//System.out.println("subtracting: " + amountToSubtract * Evaluation.itemRevenue[itemId]);
+				result -= amountToSubtract * Evaluation.itemRevenue[itemId];
 			}
 		}
 		
@@ -168,6 +168,7 @@ public class Evaluation {
 		}
 		
 		//done
+		//System.out.println("intermediate result: " + result);
 		return result;
 	}
 }

@@ -1,5 +1,7 @@
 package solver;
 
+import java.util.Random;
+
 import model.Problem;
 import solution.Evaluation;
 import solution.OverStockException;
@@ -22,8 +24,8 @@ public class AltachemSolver {
 		
 		//meta settings -----------------------------------------
 		
-		int MAX_IDLE = 1000;
-		int L = 100;
+		int MAX_IDLE = 100000;
+		int L = 1000;
 		
 		//initial solution --------------------------------------
 		
@@ -55,7 +57,8 @@ public class AltachemSolver {
 			solution = new Solution(bestSolution);
 			
 			//move
-			solution.executeRandomSwap();
+			Random random = new Random();
+			solution.addMachineOrder(random.nextInt(), random.nextInt());
 			
 			//compile and recalculate
 			try {
@@ -76,12 +79,15 @@ public class AltachemSolver {
 			double newCost = solution.getTempCost();
 			
 			// [meta] accept? -----------------------------------
-			
 			if(newCost < currentCost || newCost < bound) {
+				System.out.println("newCost:" + newCost);
+				System.out.println("currentCost: " + currentCost);
 				idle = 0;
+				System.out.println("bestCost: " + bestSolution.getTempCost());
 				if(solution.getTempCost() < bestSolution.getTempCost()) {
 					bestSolution = solution;
 					listener.improved(bestSolution);
+					continue;
 				}
 			} else {
 				idle++;

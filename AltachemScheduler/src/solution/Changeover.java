@@ -64,7 +64,7 @@ public class Changeover extends Job {
 
 	@Override
 	public String toString() {
-		return "Changeover [fromItemId=" + fromItemId + ", toItemId=" + toItemId + "]";
+		return "S_"+this.fromItemId+"_"+this.toItemId;
 	}
 	
 	public Changeover maakChangeover(int fromId, int toId) {

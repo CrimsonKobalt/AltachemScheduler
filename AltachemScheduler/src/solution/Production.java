@@ -24,7 +24,7 @@ public class Production extends Job {
 
 	@Override
 	public String toString() {
-		return "Production [itemId=" + itemId + "]";
+		return "I_"+this.itemId;
 	}
 	
 	@Override

@@ -124,6 +124,7 @@ public class Solution {
 			machineDate[2] = problem.getMachines()[m].getLastItemIdProduced(); //last item produced
 			currentData.add(machineDate);
 		}
+		
 		for(ProductionOrder po : orders) {
 			int currentMachine = po.getMachineId();
 			//System.out.println("Machine: " + currentMachine);
@@ -309,7 +310,7 @@ public class Solution {
 				//start producing
 				int blocksProduced = 0;
 				while(blocksProduced<po.getAmountOfBlocks()) {
-					System.out.println("in while producing");
+					//System.out.println("in while producing");
 					if(horizon[currentDay].parallelwerk || currentBlock>problem.getLastDayShiftIndex()) { //PARALLELWERK
 						if(new Idle().equals(horizon[currentDay].jobs[currentMachine][currentBlock])) {
 							blocksProduced++;
@@ -328,7 +329,7 @@ public class Solution {
 						if(bothIdle) {
 							blocksProduced++;
 							horizon[currentDay].setJob(new Production(po.getItemId()), currentMachine, currentBlock);
-							System.out.println(horizon[currentDay].jobs[currentMachine][currentBlock]);
+							//System.out.println(horizon[currentDay].jobs[currentMachine][currentBlock]);
 						}else {
 							//Do nothing
 						}
@@ -403,7 +404,7 @@ public class Solution {
 
 		switch (randomInt){
 			case 0: swapParallelWork(randPosInt); break;
-			case 1: swapNightShift(randPosInt, random.nextBoolean(), random.nextBoolean()); break;
+			case 1: this.addMachineOrder(randPosInt, randPosInt2); break;
 			case 2: swapOvertime(randPosInt, randPosInt2); break;
 			case 3: swapOrders(randPosInt, randPosInt2); break;
 			case 4: swapRequestOrder(randPosInt, randPosInt2); break;
@@ -416,12 +417,12 @@ public class Solution {
 		
 	}
 	public void swapParallelWork(int randomInt) {
-		System.out.println("swapParallelWork");
+		//System.out.println("swapParallelWork");
 		this.horizon[randomInt % this.horizon.length].setParallelwerk(!this.horizon[randomInt % this.horizon.length].parallelwerk);
 	}
 
 	public void swapOvertime(int randomInt1, int randomInt2) {
-		System.out.println("swapOvertime");
+		//System.out.println("swapOvertime");
 		//TODO: zorg dat die niet kan als we op een nachtshift vallen
 		// ---> geef in de plaats een nachtshiftswap op die dag door ofzo.
 		//use the timehorizon.length & randomInt1 to choose a day
@@ -433,7 +434,7 @@ public class Solution {
 	}
 	
 	public void swapNightShift(int randomInt, boolean randomBool1, boolean randomBool2) {
-		System.out.println("swapNightShift");
+		//System.out.println("swapNightShift");
 		//TODO: rekening houden met die eerste dagen
 		// 		-> als de history het nodig acht dat er in het begin nachtshifts zijn mag je die niet uitzetten.
 		//TODO: nightshifts mogen optreden aan het einde van de periode ook & moeten hiet niet per se hun volledige periode uitzitten.
@@ -531,7 +532,7 @@ public class Solution {
 	}
 	
 	public void addMachineOrder(int randomInt1, int randomInt2) {
-		System.out.println("addMachineOrder");
+		//System.out.println("addMachineOrder");
 		//create a random machineOrder with size == 1 & add it to the end.
 		//TODO: is het beter om hier direct meerdere blokken toe te voegen? hmmm...
 		randomInt1 = Math.abs(randomInt1);
@@ -567,7 +568,7 @@ public class Solution {
 	}
 
 	public void swapOrders(int randomInt1, int randomInt2) {
-		System.out.println("swapOrders");
+		//System.out.println("swapOrders");
 		//indien geen productionorders => vervangen door add
 		if (orders.isEmpty() || orders.size() == 1)
 			addMachineOrder(randomInt1, randomInt2);
@@ -584,7 +585,7 @@ public class Solution {
 	}
 	
 	public void changeMachineForOrders(int randomInt1, int randomInt2) {
-		System.out.println("changeMachineForOrders");
+		//System.out.println("changeMachineForOrders");
 		//indien geen productionorders zijn => vervangen door add
 		if (orders.isEmpty())
 			addMachineOrder(randomInt1, randomInt2);
@@ -595,7 +596,7 @@ public class Solution {
 	}
 	
 	public void changeItemForOrder(int randomInt1, int randomInt2) {
-		System.out.println("changeItemForOrders");
+		//System.out.println("changeItemForOrders");
 		//indien geen productionorders zijn => vervangen door add
 		if (orders.isEmpty())
 			addMachineOrder(randomInt1, randomInt2);
@@ -607,7 +608,7 @@ public class Solution {
 	
 	//wissel 2 requests van plaats in array
 	public void swapRequestOrder(int randomInt1, int randomInt2) {
-		System.out.println("swapRequestOrder");
+		//System.out.println("swapRequestOrder");
 		int index1 = randomInt1%problem.getRequests().length;
 		int index2 = randomInt2%problem.getRequests().length;
 
@@ -616,10 +617,7 @@ public class Solution {
 			index2 = Math.abs(new Random().nextInt()) % problem.getRequests().length;
 		}
 
-		Request[] requests = problem.getRequests();
-		Request temp = requests[index2];
-		requests[index2] = requests[index1];
-		requests[index1] = temp;
+		Collections.swap(requestOrder, index1, index2);
 	}
 	//END SWAPS
 	

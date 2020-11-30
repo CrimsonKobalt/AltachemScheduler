@@ -7,4 +7,6 @@ public abstract class Job {
 		return false;
 	}
 	
+	public abstract String toString();
+	
 }
