@@ -24,8 +24,8 @@ public class AltachemSolver {
 		
 		//meta settings -----------------------------------------
 		
-		int MAX_IDLE = 100000;
-		int L = 1000;
+		int MAX_IDLE = 100;
+		int L = 10;
 		
 		//initial solution --------------------------------------
 		

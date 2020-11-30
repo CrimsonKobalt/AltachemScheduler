@@ -139,13 +139,15 @@ public class Evaluation {
 				//voor elk item dat nodig is voor de request te kunnen verschepen, de hoeveelheid in stock op die dag * de revenue per item voor dat item.
 			for(int itemId = 0; itemId < r.getAmountsRequested().length; itemId++) {
 				int amountToSubtract = 0;
-				if(r.getAmountsRequested()[itemId] - solution.horizon[dayIndex].stock[itemId] > 0) {
-					amountToSubtract = solution.horizon[dayIndex].stock[itemId];
-				} else {
-					amountToSubtract = r.getAmountsRequested()[itemId];
+				if (r.getAmountsRequested()[itemId] != 0) {
+					if (r.getAmountsRequested()[itemId] - solution.horizon[dayIndex].stock[itemId] > 0) {
+						amountToSubtract = solution.horizon[dayIndex].stock[itemId];
+					} else {
+						amountToSubtract = r.getAmountsRequested()[itemId];
+					}
+					//System.out.println("subtracting: " + amountToSubtract * Evaluation.itemRevenue[itemId]);
+					result -= amountToSubtract * Evaluation.itemRevenue[itemId];
 				}
-				//System.out.println("subtracting: " + amountToSubtract * Evaluation.itemRevenue[itemId]);
-				result -= amountToSubtract * Evaluation.itemRevenue[itemId];
 			}
 		}
 		
