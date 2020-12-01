@@ -51,7 +51,7 @@ public class AltachemSolver {
 		
 		//loop --------------------------------------------------
 		int maxIterations = 1000000;
-		while(maxIterations >= 0) {
+		while(true) {
 			
 			//double currentCost = bestSolution.getTempCost();
 			double currentCost = bestSolution.getCost();
@@ -92,9 +92,9 @@ public class AltachemSolver {
 			
 			// [meta] accept? -----------------------------------
 			if(newCost <= currentCost || newCost < bound) {
-				idle = 0;
 				carryOver = solution;
 				if(solution.getTempCost() < bestSolution.getTempCost()) {
+					idle = 0;
 					bestSolution = solution;
 					listener.improved(bestSolution);
 				}

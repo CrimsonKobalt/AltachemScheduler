@@ -29,7 +29,7 @@ public class Evaluation {
 			if(d.overtime > 0) result += (d.overtime * Evaluation.overtimeBlockCost);
 			//add stock cost
 			for(int i=0; i<d.stock.length; i++) {
-				if(d.stock[i] < minStock[i]) result += Evaluation.underStockPenaltyCost;
+				if(d.stock[i] < minStock[i]) result += (minStock[i] - d.stock[i]) * Evaluation.underStockPenaltyCost;
 				if(d.stock[i] > maxStock[i]) throw new OverStockException();
 			}
 			//add requests to shippedRequests if they have been shipped
@@ -54,7 +54,7 @@ public class Evaluation {
 			if(extraNightShiftsToPay >= solution.horizon.length) {
 				System.out.println("Gemene input: minAantalConsecutiveNightShifts > horizon.length");
 			}
-			for(int i=1; i<count; i++) {
+			for(int i=1; i<count+1; i++) {
 				if(solution.horizon[solution.horizon.length-i].nachtshift) {
 					extraNightShiftsToPay--;
 				} else {
