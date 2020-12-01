@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import model.Problem;
 import solution.OverStockException;
@@ -41,7 +44,7 @@ public class Main {
 			System.out.println("Error evaluating function: overstockException caught: this should never be able to be thrown though.");
 		}
 		
-		solution.printSchedule();
+		//solution.printSchedule();
 		
 		solution.write(outputFilename);
 		

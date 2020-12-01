@@ -238,10 +238,10 @@ public class Solution {
 						
 					}else{
 						// Large Changeover -> niet-parallel
-						System.out.println("large changeover" + co.getFromItemId() + ", " + co.getToItemId());
+						//System.out.println("large changeover" + co.getFromItemId() + ", " + co.getToItemId());
 						while(consecutiveBlocks<coDuration) {
 							if(currentBlock>=problem.getTechnicianStartIndex() && currentBlock<=problem.getTechnicianStopIndex()) {
-								System.out.println("current Block: " + currentBlock);
+								//System.out.println("current Block: " + currentBlock);
 									boolean bothIdle = true;
 									for(int m=0;m<problem.getMachines().length;m++) {
 										if(new Idle().equals(horizon[currentDay].jobs[m][currentBlock])) {				
@@ -276,20 +276,20 @@ public class Solution {
 									&& !horizon[currentDay].isNachtshift()) {
 								currentBlock = 0;
 								currentDay++;
-								searchDayWithoutSameChangeover(co, currentDay, currentBlock);
 								if(currentDay>=horizon.length) {
 									throw new ScheduleException();
 								}
+								searchDayWithoutSameChangeover(co, currentDay, currentBlock);
 								startBlock = 0; 
 								consecutiveBlocks = 0;
 								maintenanceBlocks.clear();
 							}else if(currentBlock>=problem.getBlocksPerDay() && horizon[currentDay].isNachtshift()) {
 								currentBlock = 0;
 								currentDay++;
-								searchDayWithoutSameChangeover(co, currentDay, currentBlock);
 								if(currentDay>=horizon.length) {
 									throw new ScheduleException();
 								}
+								searchDayWithoutSameChangeover(co, currentDay, currentBlock);
 								startBlock = 0;
 								consecutiveBlocks = 0;
 								maintenanceBlocks.clear();
@@ -378,39 +378,37 @@ public class Solution {
 		
 			//handleRquests()
 			List<Request> requests = new ArrayList<>();
+			requests.addAll(requestOrder);
 			int day = 0;
-			for(Request request : requests) {				
-				boolean shipped = false;
-				while(!shipped) {
-					for(int d=day;d<horizon.length;d++) {
-						if(request.isShippingDay(d)) {
-							boolean enoughStock = true;
-							for(int i=0;i<request.getAmountsRequested().length;i++) {
-								if(request.getAmountsRequested()[i]>horizon[day].stock[i]) {
-									enoughStock = false;
-								}
-							}
-							if(enoughStock) {
-								
-								for(int n=day;n<horizon.length;n++) {
-									for(int i=0;i<request.getAmountsRequested().length;i++) {
-										horizon[n].stock[i] -= request.getAmountsRequested()[i];
-									}
-								}
-								shipped=true;
-								horizon[day].shippedToday.add(request);
+			while(day < this.horizon.length) {
+				Iterator<Request> reqit = requests.iterator();
+				while(reqit.hasNext()) {
+					Request r = reqit.next();
+					if (r.isShippingDay(day)) {
+						boolean enoughStock = true;
+						for (int i = 0; i < r.getAmountsRequested().length; i++) {
+							if (r.getAmountsRequested()[i] > this.horizon[day].stock[i]) {
+								enoughStock = false;
 								break;
 							}
 						}
+						if (enoughStock) {
+							for (int i = day; i < this.horizon.length; i++) {
+								for (int itemId = 0; itemId < this.problem.getItems().length; itemId++) {
+									this.horizon[i].getStock()[itemId] -= r.getAmountsRequested()[itemId];
+								}
+							}
+							this.horizon[day].shippedToday.add(r);
+							//verwijder deze request uit de requests-list op een iteratief-veilige manier.
+							reqit.remove();
+						} 
 					}
 				}
+				day++;
 			}
 	}
 	
 	public void printSchedule() {
-		if(problem.getIsLargeChangeover()[2][0]) {
-			System.out.println("large");
-		}
 		for(int i=0; i<this.horizon.length; i++) {
 			Day d = this.horizon[i];
 			System.out.println("#Day " + i);
@@ -489,7 +487,7 @@ public class Solution {
 
 			//TODO: wat indien night shift doorlopen na horizon
 			int endNightshift = index;
-			while(horizon[endNightshift].isNachtshift() && endNightshift < horizon.length)
+			while(endNightshift < horizon.length && horizon[endNightshift].isNachtshift())
 				endNightshift++;
 			endNightshift--;
 
@@ -516,7 +514,7 @@ public class Solution {
 
 				//voorraan en achteraan toevoegen is mogelijk
 				//voorraan toevoegen
-				else if (randomBool2) {
+				else if (randomBool2 && startNightshift > 0) {
 					horizon[startNightshift-1].setNachtshift(true);
 					horizon[startNightshift-1].setOvertime(0);
 				}
@@ -524,7 +522,7 @@ public class Solution {
 				
 
 				//achteraan toevoegen
-				else {
+				else if (endNightshift < horizon.length - 1){
 					horizon[endNightshift+1].setNachtshift(true);
 					horizon[endNightshift+1].setOvertime(0);
 				}
@@ -598,9 +596,12 @@ public class Solution {
 			addMachineOrder(randomInt, new Random().nextInt());
 
 		//neem block weg van random ProductionOrder
-		else
+		else {
 			this.orders.get(randomInt % this.orders.size()).decrementAmountOfBlocks();
-
+			if(this.orders.get(randomInt % this.orders.size()).getAmountOfBlocks() == 0) {
+				this.orders.remove(randomInt % this.orders.size());
+			}
+		}
 	}
 
 	public void swapOrders(int randomInt1, int randomInt2) {

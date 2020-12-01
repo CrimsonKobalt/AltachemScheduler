@@ -18,14 +18,15 @@ public class AltachemSolver {
 	//step-counting hill-climbing.
 	public Solution solve(Problem problem) {
 		Solution bestSolution = null;
+		Solution carryOver = null;
 		Solution solution = null;
 		
 		Evaluation.configureEvaluation(problem);
 		
 		//meta settings -----------------------------------------
 		
-		int MAX_IDLE = 100;
-		int L = 10;
+		int MAX_IDLE = 100000;
+		int L = 1000;
 		
 		//initial solution --------------------------------------
 		
@@ -38,6 +39,7 @@ public class AltachemSolver {
 			return null;
 		}
 		bestSolution = solution;
+		carryOver = solution;
 		listener.improved(bestSolution);
 		
 		
@@ -45,17 +47,18 @@ public class AltachemSolver {
 		
 		int idle = 0;
 		int count = 0;
-		double bound = solution.getTempCost();
+		double bound = solution.getCost();
 		
 		//loop --------------------------------------------------
-		
-		while(true) {
+		int maxIterations = 1000000;
+		while(maxIterations >= 0) {
 			
-			double currentCost = bestSolution.getTempCost();
+			//double currentCost = bestSolution.getTempCost();
+			double currentCost = bestSolution.getCost();
 			
 			//bestSolution.printSchedule();
 			//copy the old solution
-			solution = new Solution(bestSolution);
+			solution = new Solution(carryOver);
 			
 			//move
 			solution.executeRandomSwap();
@@ -65,7 +68,7 @@ public class AltachemSolver {
 				solution.constructSchedule();
 			} catch (ScheduleException se) {
 				idle++;
-				se.printStackTrace();
+				maxIterations--;
 				continue;
 			}
 			
@@ -74,20 +77,23 @@ public class AltachemSolver {
 			
 			try {
 				solution.evaluateIntermediateSolution();
+				solution.evaluate();
 			} catch (OverStockException e) {
 				idle++;
-				e.printStackTrace();
+				maxIterations--;
 				continue;
 			}
 			
 			//System.out.println("post evaluation...");
 			//solution.printSchedule();
 			
-			double newCost = solution.getTempCost();
+			//double newCost = solution.getTempCost();
+			double newCost = solution.getCost();
 			
 			// [meta] accept? -----------------------------------
-			if(newCost < currentCost || newCost < bound) {
+			if(newCost <= currentCost || newCost < bound) {
 				idle = 0;
+				carryOver = solution;
 				if(solution.getTempCost() < bestSolution.getTempCost()) {
 					bestSolution = solution;
 					listener.improved(bestSolution);
@@ -101,7 +107,7 @@ public class AltachemSolver {
 			
 			count++;
 			if(count % L == 0) {
-				bound = bestSolution.getTempCost();
+				bound = carryOver.getCost();
 			}
 			
 			//stop? ---------------------------------------------
@@ -109,11 +115,13 @@ public class AltachemSolver {
 			if(idle >= MAX_IDLE) {
 				break;
 			}
+			
+			maxIterations--;
 		}
 		
 		//finished ----------------------------------------------
 		
-		bestSolution.printSchedule();
+		//bestSolution.printSchedule();
 		
 		return bestSolution;
 	}

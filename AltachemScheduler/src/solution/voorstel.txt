@@ -87,6 +87,18 @@ Swaps zijn nu:
 				- verplaatsen van machine van een MachineOrder
 				- op een andere positie plaatsen in de lijst
 				- +1/-1 blokken productie?
+				
+-------------------------------------------------------------------------------------------------------------------------
+
+%Chris
+
+het probleem lijkt te zijn dat er deadlock optreedt tussen
+				- proberen enkel requestOrders.get(0) te vervullen
+				- geen nieuwe slots kunnen invullen want alle limieten van stock zijn bereikt
+				
+				maw. ipv te eisen dat requestOrders.get(0) als eerste MOET vervult worden,
+				eis dat er prioriteit aan deze wordt gegeven in de plaats!
+					dan kunnen andere requests behandeld worden in de tussentijd...
 
 
 
