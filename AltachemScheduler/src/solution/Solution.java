@@ -164,12 +164,12 @@ public class Solution {
 									&& !horizon[currentDay].isNachtshift()) {
 								currentBlock = 0;
 								currentDay++;
-								searchDayWithoutSameChangeover(co, currentDay, currentBlock);
-								startBlock = 0; 
-								consecutiveBlocks = 0;
 								if(currentDay>=horizon.length) {
 									throw new ScheduleException();
 								}
+								searchDayWithoutSameChangeover(co, currentDay, currentBlock);
+								startBlock = 0; 
+								consecutiveBlocks = 0;
 								maintenanceBlocks.clear();
 							}else if(currentBlock>=problem.getBlocksPerDay() && horizon[currentDay].isNachtshift()) {
 								currentBlock = 0;
