@@ -3,6 +3,7 @@ package solution;
 import java.util.ArrayList;
 import java.util.List;
 
+import model.Machine;
 import model.Problem;
 import model.Request;
 
@@ -23,10 +24,6 @@ public class Evaluation {
 		for(Day d: solution.horizon) {
 			//add night shift cost
 			if(d.nachtshift) result += Evaluation.nightshiftCost;
-			//add parallel cost
-			if(d.parallelwerk) result += Evaluation.parallelCost;
-			//add overtime cost
-			if(d.overtime > 0) result += (d.overtime * Evaluation.overtimeBlockCost);
 			//add stock cost
 			for(int i=0; i<d.stock.length; i++) {
 				if(d.stock[i] < minStock[i]) result += (minStock[i] - d.stock[i]) * Evaluation.underStockPenaltyCost;
@@ -35,6 +32,55 @@ public class Evaluation {
 			//add requests to shippedRequests if they have been shipped
 			for(Request r : d.shippedToday) {
 				shippedRequests.add(r);
+			}
+		}
+		
+		//fix overtime
+		for(Day d: solution.horizon) {
+			if(d.overtime > 0) {
+				int overtime = 0;
+				for(Machine m: solution.problem.getMachines()) {
+					for(int i=solution.problem.getLastDayShiftIndex()+1; i<solution.problem.getLastOvertimeIndex()+1; i++) {
+						int thisAmountOfOvertimes = 0;
+						if(d.jobs[m.getMachineId()][i].equals(new Idle())) {
+							if(thisAmountOfOvertimes > overtime) {
+								overtime = thisAmountOfOvertimes;
+							}
+							break;
+						} else {
+							if(++thisAmountOfOvertimes > overtime) {
+								overtime = thisAmountOfOvertimes;
+							}
+						}
+					}
+				}
+				result += overtime * Evaluation.overtimeBlockCost;
+			}
+		}
+		
+		//fix parallelwerk
+		for(Day d: solution.horizon) {
+			if(d.parallelwerk) {
+				boolean inparallel = false;
+				for(int i=0; i<solution.problem.getLastDayShiftIndex()+1; i++) {
+					boolean blockInUse = false;
+					for(Machine m: solution.problem.getMachines()) {
+						if(!d.jobs[m.getMachineId()][i].equals(new Idle())) {
+							if(blockInUse == true) {
+								inparallel = true;
+								break;
+							} else {
+								blockInUse = true;
+							}
+						}
+					}
+					if(inparallel) {
+						break;
+					}
+				}
+				if(inparallel) {
+					result += Evaluation.parallelCost;
+				}
 			}
 		}
 		
@@ -91,18 +137,63 @@ public class Evaluation {
 		for(Day d: solution.horizon) {
 			//add night shift cost
 			if(d.nachtshift) result += Evaluation.nightshiftCost;
-			//add parallel cost
-			if(d.parallelwerk) result += Evaluation.parallelCost;
-			//add overtime cost
-			if(d.overtime > 0) result += (d.overtime * Evaluation.overtimeBlockCost);
 			//add stock cost
 			for(int i=0; i<d.stock.length; i++) {
-				if(d.stock[i] < minStock[i]) result += Evaluation.underStockPenaltyCost;
+				if(d.stock[i] < minStock[i]) result += (minStock[i] - d.stock[i]) * Evaluation.underStockPenaltyCost;
 				if(d.stock[i] > maxStock[i]) throw new OverStockException();
 			}
 			//add requests to shippedRequests if they have been shipped
 			for(Request r : d.shippedToday) {
 				shippedRequests.add(r);
+			}
+		}
+		
+		//fix overtime
+		for(Day d: solution.horizon) {
+			if(d.overtime > 0) {
+				int overtime = 0;
+				for(Machine m: solution.problem.getMachines()) {
+					for(int i=solution.problem.getLastDayShiftIndex()+1; i<solution.problem.getLastOvertimeIndex()+1; i++) {
+						int thisAmountOfOvertimes = 0;
+						if(d.jobs[m.getMachineId()][i].equals(new Idle())) {
+							if(thisAmountOfOvertimes > overtime) {
+								overtime = thisAmountOfOvertimes;
+							}
+							break;
+						} else {
+							if(++thisAmountOfOvertimes > overtime) {
+								overtime = thisAmountOfOvertimes;
+							}
+						}
+					}
+				}
+				result += overtime * Evaluation.overtimeBlockCost;
+			}
+		}
+				
+		//fix parallelwerk
+		for(Day d: solution.horizon) {
+			if(d.parallelwerk) {
+				boolean inparallel = false;
+				for(int i=0; i<solution.problem.getLastDayShiftIndex()+1; i++) {
+					boolean blockInUse = false;
+					for(Machine m: solution.problem.getMachines()) {
+						if(!d.jobs[m.getMachineId()][i].equals(new Idle())) {
+							if(blockInUse == true) {
+								inparallel = true;
+								break;
+							} else {
+								blockInUse = true;
+							}
+						}
+					}
+					if(inparallel) {
+						break;
+					}
+				}
+				if(inparallel) {
+					result += Evaluation.parallelCost;
+				}
 			}
 		}
 		
@@ -169,7 +260,6 @@ public class Evaluation {
 		}
 		
 		//done
-		//System.out.println("intermediate result: " + result);
 		return result;
 	}
 }

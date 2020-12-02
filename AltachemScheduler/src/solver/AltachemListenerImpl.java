@@ -16,11 +16,6 @@ public class AltachemListenerImpl implements AltachemListener{
 	public synchronized void improved(Solution solution) {
 		System.out.print("improved solution found: \n\t\tcost: ");
 		System.out.println(solution.getCost());
-	}
-	
-	public synchronized void doFinal(Solution solution) {
-		System.out.print("ending at improved solution: \n\t\tcost: ");
-		System.out.println(solution.getCost());
 		
 		if(solution.getCost() < bestSolutionCost) {
 			result = solution;

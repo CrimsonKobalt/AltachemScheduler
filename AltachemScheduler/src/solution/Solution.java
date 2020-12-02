@@ -443,7 +443,55 @@ public class Solution {
 				currentData.get(currentMachine)[2] = po.getItemId();
 				
 			}//End of orders
-			
+		
+		/*
+		//fix overtime
+			for(Day d: this.horizon) {
+				if(d.overtime > 0) {
+					boolean used = false;
+					for(Machine m: this.problem.getMachines()) {
+						for(int i=this.problem.getLastDayShiftIndex()+1; i<this.problem.getLastOvertimeIndex()+1; i++) {
+							if(!d.jobs[m.getMachineId()][i].equals(new Idle())) {
+								used = true;
+								break;
+							}
+						}
+						if(used) {
+							break;
+						}
+					}
+					if(!used) {
+						d.overtime = 0;
+					}
+				}
+			}
+		
+			//fix parallelwork
+			for(Day d: this.horizon) {
+				if(d.parallelwerk) {
+					boolean inparallel = false;
+					for(int i=0; i<this.problem.getLastDayShiftIndex()+1; i++) {
+						boolean blockInUse = false;
+						for(Machine m: this.problem.getMachines()) {
+							if(!d.jobs[m.getMachineId()][i].equals(new Idle())) {
+								if(blockInUse == true) {
+									inparallel = true;
+									break;
+								} else {
+									blockInUse = true;
+								}
+							}
+						}
+						if(inparallel) {
+							break;
+						}
+					}
+					if(!inparallel) {
+						d.parallelwerk = false;
+					}
+				}
+			}
+		*/	
 		
 			calculateStock();
 		

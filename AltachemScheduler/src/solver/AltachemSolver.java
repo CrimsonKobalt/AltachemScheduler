@@ -32,8 +32,7 @@ public class AltachemSolver {
 		
 		solution = Solution.CreateInitialSolution(problem);
 		try {
-			System.out.println("solution.evaluate(): " + solution.evaluate());
-			System.out.println("solution.evaluateIntermediateSolution: " + solution.evaluateIntermediateSolution());
+			solution.evaluate();
 		} catch (OverStockException e1) {
 			System.err.println("initial solution cannot be constructed due to stock-overflow.");
 			return null;
@@ -50,13 +49,11 @@ public class AltachemSolver {
 		double bound = solution.getCost();
 		
 		//loop --------------------------------------------------
-		int maxIterations = 1000000;
 		while(true) {
 			
 			//double currentCost = bestSolution.getTempCost();
 			double currentCost = bestSolution.getCost();
 			
-			//bestSolution.printSchedule();
 			//copy the old solution
 			solution = new Solution(carryOver);
 			
@@ -68,24 +65,15 @@ public class AltachemSolver {
 				solution.constructSchedule();
 			} catch (ScheduleException se) {
 				idle++;
-				maxIterations--;
 				continue;
 			}
 			
-			//System.out.println("before evaluation...");
-			//bestSolution.printSchedule();
-			
 			try {
-				solution.evaluateIntermediateSolution();
 				solution.evaluate();
 			} catch (OverStockException e) {
 				idle++;
-				maxIterations--;
 				continue;
 			}
-			
-			//System.out.println("post evaluation...");
-			//solution.printSchedule();
 			
 			//double newCost = solution.getTempCost();
 			double newCost = solution.getCost();
@@ -93,7 +81,7 @@ public class AltachemSolver {
 			// [meta] accept? -----------------------------------
 			if(newCost <= currentCost || newCost < bound) {
 				carryOver = solution;
-				if(solution.getTempCost() < bestSolution.getTempCost()) {
+				if(solution.getCost() < bestSolution.getCost()) {
 					idle = 0;
 					bestSolution = solution;
 					listener.improved(bestSolution);
@@ -115,13 +103,9 @@ public class AltachemSolver {
 			if(idle >= MAX_IDLE) {
 				break;
 			}
-			
-			maxIterations--;
 		}
 		
 		//finished ----------------------------------------------
-		
-		//bestSolution.printSchedule();
 		
 		return bestSolution;
 	}

@@ -74,4 +74,20 @@ public class Changeover extends Job {
 		//return normal changeover
 		return null;
 	}
+
+	@Override
+	public boolean equals(Job job) {
+		if(!this.getClass().equals(job.getClass())) {
+			return false;
+		} else {
+			Changeover co = (Changeover) job;
+			if(this.fromItemId != co.fromItemId) {
+				return false;
+			}
+			if(this.toItemId != co.toItemId) {
+				return false;
+			}
+		}
+		return true;
+	}
 }
