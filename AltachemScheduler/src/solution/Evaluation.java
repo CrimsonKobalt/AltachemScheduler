@@ -40,9 +40,9 @@ public class Evaluation {
 			if(d.overtime > 0) {
 				int overtime = 0;
 				for(Machine m: solution.problem.getMachines()) {
+					int thisAmountOfOvertimes = 0;
 					for(int i=solution.problem.getLastDayShiftIndex()+1; i<solution.problem.getLastOvertimeIndex()+1; i++) {
-						int thisAmountOfOvertimes = 0;
-						if(d.jobs[m.getMachineId()][i].equals(new Idle())) {
+						if(new Idle().equals(d.jobs[m.getMachineId()][i])) {
 							if(thisAmountOfOvertimes > overtime) {
 								overtime = thisAmountOfOvertimes;
 							}
