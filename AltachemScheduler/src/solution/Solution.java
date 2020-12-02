@@ -135,7 +135,12 @@ public class Solution {
 			
 			if(lastProduced != po.getItemId()) {
 				Changeover co = new Changeover(lastProduced, po.getItemId());
-				searchDayWithoutSameChangeover(co, currentDay, currentBlock);
+				while(!isDayWithoutSameChangeover(co, currentDay, currentBlock)) {
+					currentDay++;
+					if(currentDay>=horizon.length) {
+						throw new ScheduleException();
+					}
+				}
 				
 				int consecutiveBlocks = 0; //wordt terug op nul gezet als er een production gevonden wordt
 				int startBlock = currentBlock;	
@@ -193,7 +198,13 @@ public class Solution {
 								if(currentDay>=horizon.length) {
 									throw new ScheduleException();
 								}
-								searchDayWithoutSameChangeover(co, currentDay, currentBlock);
+								while(!isDayWithoutSameChangeover(co, currentDay, currentBlock)) {
+									currentDay++;
+									if(currentDay>=horizon.length) {
+										throw new ScheduleException();
+									}
+								}
+								
 								startBlock = 0; 
 								consecutiveBlocks = 0;
 								maintenanceBlocks.clear();
@@ -205,7 +216,12 @@ public class Solution {
 								if(currentDay>=horizon.length) {
 									throw new ScheduleException();
 								}
-								searchDayWithoutSameChangeover(co, currentDay, currentBlock);
+								while(!isDayWithoutSameChangeover(co, currentDay, currentBlock)) {
+									currentDay++;
+									if(currentDay>=horizon.length) {
+										throw new ScheduleException();
+									}
+								}
 								maintenanceBlocks.clear();
 							}
 						}else { // GEEN PARALLELWERK
@@ -247,7 +263,13 @@ public class Solution {
 								if(currentDay>=horizon.length) {
 									throw new ScheduleException();
 								}
-								searchDayWithoutSameChangeover(co, currentDay, currentBlock);
+								while(!isDayWithoutSameChangeover(co, currentDay, currentBlock)) {
+									currentDay++;
+									if(currentDay>=horizon.length) {
+										throw new ScheduleException();
+									}
+									
+								}
 								startBlock = 0; 
 								consecutiveBlocks = 0;
 								maintenanceBlocks.clear();
@@ -257,7 +279,12 @@ public class Solution {
 								if(currentDay>=horizon.length) {
 									throw new ScheduleException();
 								}
-								searchDayWithoutSameChangeover(co, currentDay, currentBlock);
+								while(!isDayWithoutSameChangeover(co, currentDay, currentBlock)) {
+									currentDay++;
+									if(currentDay>=horizon.length) {
+										throw new ScheduleException();
+									}
+								}
 								startBlock = 0;
 								consecutiveBlocks = 0;
 								maintenanceBlocks.clear();
@@ -313,7 +340,12 @@ public class Solution {
 								if(currentDay>=horizon.length) {
 									throw new ScheduleException();
 								}
-								searchDayWithoutSameChangeover(co, currentDay, currentBlock);
+								while(!isDayWithoutSameChangeover(co, currentDay, currentBlock))  {
+									currentDay++;
+									if(currentDay>=horizon.length) {
+										throw new ScheduleException();
+									}
+								}
 								startBlock = 0; 
 								consecutiveBlocks = 0;
 								maintenanceBlocks.clear();
@@ -323,7 +355,12 @@ public class Solution {
 								if(currentDay>=horizon.length) {
 									throw new ScheduleException();
 								}
-								searchDayWithoutSameChangeover(co, currentDay, currentBlock);
+								while(!isDayWithoutSameChangeover(co, currentDay, currentBlock)) {
+									currentDay++;
+									if(currentDay>=horizon.length) {
+										throw new ScheduleException();
+									}
+								}
 								startBlock = 0;
 								consecutiveBlocks = 0;
 								maintenanceBlocks.clear();
@@ -812,32 +849,20 @@ public class Solution {
 		if (dayIndex == this.horizon.length - 1) return;
 		calculateStock(dayIndex + 1, thisDay.stock);
 	}
-	//This method increase days until no duplicate changeover
-		public void searchDayWithoutSameChangeover(Changeover co, int currentDay, int currentBlock) throws ScheduleException{		
-			boolean foundDayForChangeover = false; //check if changeover already occurs on this day
-			while(!foundDayForChangeover) {	
-				foundDayForChangeover = true;
-				for(int b=0;b<problem.getBlocksPerDay();b++) {
-					for(int m=0;m<problem.getMachines().length;m++) {
-						if(co.isChangeover(horizon[currentDay].jobs[m][b])) {
-							Changeover changeover = (Changeover) horizon[currentDay].jobs[m][b];
-							if(co.isSame(changeover)) {
-								currentDay++;
-								currentBlock = 0;
-								if(currentDay>=horizon.length) {
-									throw new ScheduleException();
-								}								
-								foundDayForChangeover = false;
-								break;
-							}
+	
+		public boolean isDayWithoutSameChangeover(Changeover co, int currentDay, int currentBlock)	{					
+				
+			for(int b=0;b<problem.getBlocksPerDay();b++) {
+				for(int m=0;m<problem.getMachines().length;m++) {
+					if(co.isChangeover(horizon[currentDay].jobs[m][b])) {
+						Changeover changeover = (Changeover) horizon[currentDay].jobs[m][b];
+						if(co.isSame(changeover)) {						
+							return false;								
 						}
 					}
-					if(!foundDayForChangeover) {
-						break;
-					}
 				}
-				
 			}
+			return true;
 		}
 
 
