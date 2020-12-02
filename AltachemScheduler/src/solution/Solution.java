@@ -147,17 +147,43 @@ public class Solution {
 					while(consecutiveBlocks<coDuration) {
 						
 						if(horizon[currentDay].parallelwerk || currentBlock>problem.getLastDayShiftIndex()) { 
-							//PARALLELWERK
-							if(new Idle().equals(horizon[currentDay].jobs[currentMachine][currentBlock])) {
-								consecutiveBlocks++;
-							}else if(new Production(1).isProduction(horizon[currentDay].jobs[currentMachine][currentBlock])) {
-								consecutiveBlocks= 0;
-								startBlock = currentBlock + 1;
-							}else if(new Changeover(1, 0).isChangeover(horizon[currentDay].jobs[currentMachine][currentBlock])){
-								consecutiveBlocks= 0;
-								startBlock = currentBlock + 1;
-							}else {
-								maintenanceBlocks.add(currentBlock);
+							//PARALLELWERK (mag niet parallel met largeChangeover or maintenance
+							boolean noLargeCoOrMainten = true;
+							for(int m=0;m<problem.getMachines().length;m++) {
+								if(new Changeover(1, 0).isChangeover(horizon[currentDay].jobs[m][currentBlock])){
+									Changeover lco = (Changeover) horizon[currentDay].jobs[m][currentBlock];
+									if(problem.getIsLargeChangeover()[lco.getFromItemId()][lco.getToItemId()]) {
+										if(noLargeCoOrMainten) {
+											maintenanceBlocks.add(currentBlock);
+										}
+										noLargeCoOrMainten = false;
+										if(m==currentMachine) {
+											startBlock = currentBlock + 1;
+											consecutiveBlocks = 0;
+											maintenanceBlocks.clear();
+										}
+										
+									}
+								}else if(new Maintenance().isMaintenance(horizon[currentDay].jobs[m][currentBlock])){
+									if(noLargeCoOrMainten) {
+										maintenanceBlocks.add(currentBlock);
+									}
+									noLargeCoOrMainten = false;
+								}
+							}
+							if(noLargeCoOrMainten) {
+								if(new Idle().equals(horizon[currentDay].jobs[currentMachine][currentBlock])) {
+									consecutiveBlocks++;
+								}else if(new Production(1).isProduction(horizon[currentDay].jobs[currentMachine][currentBlock])) {
+									consecutiveBlocks= 0;
+									startBlock = currentBlock + 1;	
+									maintenanceBlocks.clear();
+								}else if(new Changeover(1,0).isChangeover(horizon[currentDay].jobs[currentMachine][currentBlock])) {
+									//Kan nog small changeover zijn
+									consecutiveBlocks = 0;
+									startBlock = currentBlock + 1;
+									maintenanceBlocks.clear();
+								}
 							}
 							currentBlock++;
 							if(currentBlock >= (problem.getLastDayShiftIndex() + horizon[currentDay].getOvertime())
@@ -192,14 +218,18 @@ public class Solution {
 								}else if(new Production(1).isProduction(horizon[currentDay].jobs[m][currentBlock])) { //maakt niet uit welk item
 									consecutiveBlocks = 0;
 									startBlock = currentBlock +1;
+									maintenanceBlocks.clear();
 									bothIdle = false;
 								}else if(new Changeover(1, 0).isChangeover(horizon[currentDay].jobs[m][currentBlock])){
 									consecutiveBlocks= 0;
 									startBlock = currentBlock + 1;
+									maintenanceBlocks.clear();
 									bothIdle = false;
 								}else {
-									bothIdle = false;
-									maintenanceBlocks.add(currentBlock);
+									if(bothIdle) {
+										maintenanceBlocks.add(currentBlock);
+									}
+									bothIdle = false;							
 									
 								}
 							}
@@ -251,15 +281,19 @@ public class Solution {
 										}else if(new Production(1).isProduction(horizon[currentDay].jobs[m][currentBlock])) { //maakt niet uit welk item
 											consecutiveBlocks = 0;
 											startBlock = currentBlock +1;
+											maintenanceBlocks.clear();
 											bothIdle = false;
 										}else if(new Changeover(1, 0).isChangeover(horizon[currentDay].jobs[m][currentBlock])){
 											consecutiveBlocks= 0;
 											startBlock = currentBlock + 1;
+											maintenanceBlocks.clear();
 											bothIdle = false;
 										}
 										else {
-											bothIdle = false;
-											maintenanceBlocks.add(currentBlock);
+											if(bothIdle) {
+												maintenanceBlocks.add(currentBlock);
+											}
+											bothIdle = false;										
 											
 										}
 									}
@@ -785,16 +819,21 @@ public class Solution {
 				foundDayForChangeover = true;
 				for(int b=0;b<problem.getBlocksPerDay();b++) {
 					for(int m=0;m<problem.getMachines().length;m++) {
-						if(new Changeover(0,1).isChangeover(horizon[currentDay].jobs[m][b])) {
-							if(co.isSame((Changeover) horizon[currentDay].jobs[m][b])) {
+						if(co.isChangeover(horizon[currentDay].jobs[m][b])) {
+							Changeover changeover = (Changeover) horizon[currentDay].jobs[m][b];
+							if(co.isSame(changeover)) {
 								currentDay++;
 								currentBlock = 0;
 								if(currentDay>=horizon.length) {
 									throw new ScheduleException();
 								}								
 								foundDayForChangeover = false;
+								break;
 							}
 						}
+					}
+					if(!foundDayForChangeover) {
+						break;
 					}
 				}
 				
