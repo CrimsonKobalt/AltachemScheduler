@@ -14,13 +14,15 @@ public class AltachemListenerImpl implements AltachemListener{
 	}
 
 	@Override
-	public synchronized void improved(Solution solution) {
-		if(solution.getCost() < bestSolutionCost) {
-			System.out.print("improved solution found: \n\t\tcost: ");
-			System.out.println(solution.getCost());
-			result = solution;
-			nextBestSolution = result;
-			bestSolutionCost = solution.getCost();
+	public void improved(Solution solution) {
+		synchronized (this) {
+			if (solution.getCost() < bestSolutionCost) {
+				System.out.print("improved solution found: \n\t\tcost: ");
+				System.out.println(solution.getCost());
+				result = solution;
+				nextBestSolution = result;
+				bestSolutionCost = solution.getCost();
+			} 
 		}
 	}
 
