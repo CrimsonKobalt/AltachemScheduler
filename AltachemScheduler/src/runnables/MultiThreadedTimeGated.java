@@ -73,6 +73,7 @@ public class MultiThreadedTimeGated {
 			@Override
 			public void run() {
 				System.out.println("Shutdown-hook: writing solution...");
+                threadPool.shutdownNow();
 				Solution solved = AltachemListenerImpl.getBestSolution();
 				
 				if (solved != null) {
@@ -128,7 +129,10 @@ class ProblemThread implements Runnable {
 		try {
 			System.out.println("now running thread with id = " + this.id);
 			AltachemSolver solver = new AltachemSolver(listener);
-			solver.solve(problem);
+			Solution solved = solver.solve(problem);
+			if(solved.getCost() == 0) {
+				System.exit(0);
+			}
 		} finally {
 			System.out.println("thread with id "+ this.id +" exited, inserting new thread in the pool...");
 			exec.submit(new ProblemThread(problem, new AltachemListenerImpl(), exec));
