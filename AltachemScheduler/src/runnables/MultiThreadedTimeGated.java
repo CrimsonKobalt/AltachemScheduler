@@ -62,22 +62,32 @@ public class MultiThreadedTimeGated {
 		            public void run() {
 		            	System.out.println("Time expired. Shutting down threads...");
 		                threadPool.shutdownNow();
-		                Solution solved = AltachemListenerImpl.getBestSolution();
-		                
-		                solved.write(outputFilePath);
-		                
-		                try {
-		                	System.out.println(runCommand("java", "-jar", "src/examples/AspValidator.jar", "-i", inputFilePath, "-s", outputFilePath));
-		                	System.exit(0);
-		                } catch (IOException ioe) {
-		                	System.out.println("IOException when trying to validate result...");
-		                }
+		                System.exit(0);
 		            }
 		        }, 
 		        //minute * 60 = seconds; seconds *1000 = milliseconds
 		        1000*60*timeLimitInMinutes - 5000
 		);
 		
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override
+			public void run() {
+				System.out.println("Shutdown-hook: writing solution...");
+				Solution solved = AltachemListenerImpl.getBestSolution();
+				
+				if (solved != null) {
+					solved.write(outputFilePath);
+					try {
+						System.out.println(runCommand("java", "-jar", "src/examples/AspValidator.jar", "-i",
+								inputFilePath, "-s", outputFilePath));
+					} catch (IOException ioe) {
+						System.out.println("IOException when trying to validate result...");
+					} 
+				} else {
+					System.err.println("No solution found. Please validate inputs and try again.");
+				}
+			}
+		});
 	}
 	
 	public static String runCommand(String... command) throws IOException {
@@ -118,7 +128,7 @@ class ProblemThread implements Runnable {
 		try {
 			System.out.println("now running thread with id = " + this.id);
 			AltachemSolver solver = new AltachemSolver(listener);
-			Solution solution = solver.solve(problem);
+			solver.solve(problem);
 		} finally {
 			System.out.println("thread with id "+ this.id +" exited, inserting new thread in the pool...");
 			exec.submit(new ProblemThread(problem, new AltachemListenerImpl(), exec));
