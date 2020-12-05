@@ -27,6 +27,8 @@ public class Solution {
 	//calculated cost -- intermediate
 	private double tempCost;
 
+	private final Random random = new Random();
+
 	public static Solution CreateInitialSolution(Problem problem) {
 		Solution solution = new Solution();
 
@@ -539,61 +541,74 @@ public class Solution {
 	
 	//START SWAPS
 	public void executeRandomSwap() {
-		Random random = new Random();
-		int randomInt = random.nextInt(15);
-		int randPosInt = random.nextInt();
-		randPosInt = Math.abs(randPosInt);
-		int randPosInt2 = random.nextInt();
-		randPosInt2 = Math.abs(randPosInt2);
-		//System.out.println(randPosInt + "\t" + randPosInt2);
-		//TODO: allemaal voorkomend met zelfde kans of kansen aanpassen (vb minder proberen voor night shift?)
 
-		switch (randomInt){
-			case 0: swapParallelWork(randPosInt); break;
-			case 1: this.swapNightShift(randPosInt, random.nextBoolean(), random.nextBoolean());
-			case 2: swapOvertime(randPosInt, randPosInt2); break;
-			case 3: swapOrders(randPosInt, randPosInt2); break;
-			case 4: swapRequestOrder(randPosInt, randPosInt2); break;
-			case 5: incrementOrderCount(randPosInt); break;
-			case 6: decrementOrderCount(randPosInt); break;
-			case 7: changeMachineForOrders(randPosInt, randPosInt2); break;
-			case 8: changeItemForOrder(randPosInt, randPosInt2); break;
-			case 9: this.addMachineOrder(randPosInt, randPosInt2); break;
-			case 10: this.addMachineOrder(randPosInt, randPosInt2); break;
-			case 11: incrementOrderCount(randPosInt); break;
-			case 12: incrementOrderCount(randPosInt); break;
-			case 13: decrementOrderCount(randPosInt); break;
-			case 14: decrementOrderCount(randPosInt); break;
+		switch (random.nextInt(10)){
+			//basisswaps
+			case 0: swapParallelWork(); break;
+			case 1: swapNightShift(); break;
+			case 2: swapOvertime(); break;
+			case 3: swapOrders(); break;
+			case 4: swapRequestOrder(); break;
+			case 5:
+				for (int i=0; i<random.nextInt(3)+1; i++)
+					incrementOrderCount();
+				break;
+			case 6:
+				for (int i=0; i<random.nextInt(3)+1; i++)
+					decrementOrderCount();
+				break;
+			case 7: changeMachineForOrders(); break;
+			case 8: changeItemForOrder(); break;
+			case 9:
+				for (int i=0; i<random.nextInt(3)+1; i++)
+					addMachineOrder();
+				break;
+
+			//grotere kansen
+
 			default: break;
 		}
 		
 	}
-	public void swapParallelWork(int randomInt) {
+
+	public void swapParallelWork() {
 		//System.out.println("swapParallelWork");
-		this.horizon[randomInt % this.horizon.length].setParallelwerk(!this.horizon[randomInt % this.horizon.length].parallelwerk);
+		this.horizon[random.nextInt(horizon.length)].setParallelwerk(!this.horizon[random.nextInt(horizon.length)].parallelwerk);
 	}
 
-	public void swapOvertime(int randomInt1, int randomInt2) {
+	public void swapOvertime() {
 		//System.out.println("swapOvertime");
-		//TODO: zorg dat die niet kan als we op een nachtshift vallen
-		// ---> geef in de plaats een nachtshiftswap op die dag door ofzo.
-		//use the timehorizon.length & randomInt1 to choose a day
-		//use randomInt2 to select how many hours of overtime to schedule (using the startOfOvertime/endOfOvertime indices)
-		int maxUrenOvertime = this.problem.getLastOvertimeIndex() - this.problem.getLastDayShiftIndex();
-		if(!horizon[randomInt1 % this.horizon.length].nachtshift) { //random dag mag geen nightshift zijn
-			this.horizon[randomInt1 % this.horizon.length].setOvertime(randomInt2 % maxUrenOvertime);
-		}		
+
+		int index = random.nextInt(horizon.length);
+
+		if (!horizon[index].isNachtshift()){
+			switch (random.nextInt(3)){
+				//select random overtime
+				case 0:
+					this.horizon[index].setOvertime(random.nextInt(problem.getLastOvertimeIndex()-problem.getLastDayShiftIndex()));
+					break;
+				//increment overtime
+				case 1:
+					if (horizon[index].getOvertime() < problem.getLastOvertimeIndex()-problem.getLastDayShiftIndex())
+						horizon[index].setOvertime(horizon[index].getOvertime()+1);
+					break;
+				//decrement overtime
+				case 2:
+					if (horizon[index].getOvertime() > 0)
+						horizon[index].setOvertime(horizon[index].getOvertime()-1);
+					break;
+			}
+		}
+		// wordt meer opgeroepen indien er al veel night shifts zijn
+		else
+			replaceNightshiftWithOvertime();
+
 	}
 	
-	public void swapNightShift(int randomInt, boolean randomBool1, boolean randomBool2) {
+	public void swapNightShift() {
 		//System.out.println("swapNightShift");
-		//TODO: rekening houden met die eerste dagen
-		// 		-> als de history het nodig acht dat er in het begin nachtshifts zijn mag je die niet uitzetten.
-		//TODO: nightshifts mogen optreden aan het einde van de periode ook & moeten hiet niet per se hun volledige periode uitzitten.
-		// hoe brengen we dit in rekening?
 
-		int index = randomInt % this.horizon.length;
-		//TODO: worden dagen na horizon behandeld in constructschedule?
+		int index = random.nextInt(horizon.length);
 		//indien random gekozen dag al een night shift is
 		if (horizon[index].isNachtshift()){
 
@@ -604,7 +619,6 @@ public class Solution {
 			}
 			startNightshift++;
 
-			//TODO: wat indien night shift doorlopen na horizon
 			int endNightshift = index;
 			while(endNightshift < horizon.length && horizon[endNightshift].isNachtshift())
 				endNightshift++;
@@ -612,58 +626,73 @@ public class Solution {
 
 			int consecutiveNightshifts = endNightshift-startNightshift+1;
 
-			//random dag toevoegen of verwijderen (verwijder alle night shifts indien minder dan 10 dagen)
+			//random dag toevoegen of verwijderen (verwijder alle night shifts indien minder dan minimum dagen)
 			//nightshifts toevoegen
-			if (randomBool1){
+			if (random.nextBoolean()){
 
 				//indien voorraan toevoegen enige mogelijkheid
 				if (endNightshift == horizon.length-1 && startNightshift > 0) {
 					horizon[startNightshift-1].setNachtshift(true);
 					horizon[startNightshift-1].setOvertime(0);
 				}
-					
-				
-
 				//indien achteraan toevoegen enige mogelijkheid
 				else if (startNightshift == 0 && endNightshift < horizon.length-1) {
 					horizon[endNightshift+1].setNachtshift(true);
 					horizon[endNightshift+1].setOvertime(0);
 				}
-					
 
 				//voorraan en achteraan toevoegen is mogelijk
 				//voorraan toevoegen
-				else if (randomBool2 && startNightshift > 0) {
+				else if (random.nextBoolean() && startNightshift > 0) {
 					horizon[startNightshift-1].setNachtshift(true);
 					horizon[startNightshift-1].setOvertime(0);
 				}
-					
-				
-
 				//achteraan toevoegen
 				else if (endNightshift < horizon.length - 1){
 					horizon[endNightshift+1].setNachtshift(true);
 					horizon[endNightshift+1].setOvertime(0);
 				}
-					
-
 			}
 
 			//nightshifts verwijderen
 			else{
-
-				//TODO: wat indien night shift doorlopen na horizon
+				//indien kleiner dan minimum => alles verwijderen
 				if (consecutiveNightshifts == problem.getMinimumConsecutiveNightShifts()){
 					//alles verwijderen
 					for (int i=startNightshift; i<=endNightshift; i++)
 						if(!isSteadyNightshift(i)) {
 							horizon[i].setNachtshift(false);
 						}
-						
 				}
+				//indien groter dan 2 keer minimum => ook dagen in midden kunnen verwijderd worden
+				else if (consecutiveNightshifts > 2*problem.getMinimumConsecutiveNightShifts()){
+					switch (random.nextInt(3)){
+						//verwijder dag in midden
+						case 0:
+							//kies random dag vanuit midden
+							int bound = consecutiveNightshifts - 2*problem.getMinimumConsecutiveNightShifts();
+							int randomInt = random.nextInt(bound);
+							int deleteIndex = startNightshift + problem.getMinimumConsecutiveNightShifts() + randomInt;
+							if (!isSteadyNightshift(deleteIndex))
+								horizon[deleteIndex].setNachtshift(false);
+							break;
+						//enkel eerste dag verwijderen
+						case 1:
+							if (!isSteadyNightshift(startNightshift))
+								horizon[startNightshift].setNachtshift(false);
+							break;
+						//enkel laatste dag verwijderen
+						case 2:
+							if(!isSteadyNightshift(endNightshift))
+								horizon[endNightshift].setNachtshift(false);
+							break;
+					}
+
+				}
+				// enkel dagen voorraan en achteraan kunnen verwijderd worden
 				else{
 					//enkel eerste dag verwijderen
-					if (randomBool2 && !isSteadyNightshift(startNightshift))
+					if (random.nextBoolean() && !isSteadyNightshift(startNightshift))
 						horizon[startNightshift].setNachtshift(false);
 					//enkel laatste dag verwijderen
 					else if(!isSteadyNightshift(endNightshift))
@@ -683,95 +712,220 @@ public class Solution {
 		}
 
 	}
-	
-	public void addMachineOrder(int randomInt1, int randomInt2) {
+
+	//enkel uitgevoerd door swapOvertime()
+	public void replaceNightshiftWithOvertime(){
+		//System.out.println("replaceNightShiftWithOvertime");
+
+		int index = random.nextInt(horizon.length);
+
+		//zoek random night shift
+		//counter zorgt dat programma niet vastloopt indien nergens night shift is
+		int counter = 0;
+		while (!horizon[index].isNachtshift() && counter < 10){
+			index = random.nextInt(horizon.length);
+			counter++;
+		}
+
+		//controleer waar night shift begint en eindigt
+		int startNightshift = index;
+		while (startNightshift >= 0 && horizon[startNightshift].isNachtshift()) {
+			startNightshift--;
+		}
+		startNightshift++;
+
+		int endNightshift = index;
+		while (endNightshift < horizon.length && horizon[endNightshift].isNachtshift())
+			endNightshift++;
+		endNightshift--;
+
+		int consecutiveNightshifts = endNightshift - startNightshift + 1;
+
+		int caseChoice = -1;
+
+		//bepaal welke mogelijkheden uit switch case mogen voorkomen
+		//indien kleiner dan minimum => alles vervangen (enkel laatste optie)
+		if (consecutiveNightshifts == problem.getMinimumConsecutiveNightShifts())
+			caseChoice = 4;
+
+		//indien groter dan 2 keer minimum => ook dagen in midden kunnen vervangen worden (opties 0 tem 6)
+		else if (consecutiveNightshifts > 2*problem.getMinimumConsecutiveNightShifts())
+			caseChoice = random.nextInt(7);
+
+		// enkel dagen voorraan en achteraan kunnen vervangen worden (opties 0 tem 4)
+		else
+			caseChoice = random.nextInt(5);
+
+
+		switch (caseChoice){
+			//enkel eerste dag vervangen
+			case 0:
+				/*
+				if (!isSteadyNightshift(startNightshift)){
+					horizon[startNightshift].setNachtshift(false);
+					//altijd vervangen door max overtime, kan later door andere swaps nog aangepast worden
+					horizon[startNightshift].setOvertime(problem.getLastOvertimeIndex()-problem.getLastDayShiftIndex());
+				}
+				break;
+				 */
+			//alle eerste dagen vervangen
+			case 1:
+				int bound = endNightshift - problem.getMinimumConsecutiveNightShifts();
+				for (int i=startNightshift; i<bound; i++){
+					if (!isSteadyNightshift(i)){
+						horizon[i].setNachtshift(false);
+						//altijd vervangen door max overtime, kan later door andere swaps nog aangepast worden
+						horizon[i].setOvertime(problem.getLastOvertimeIndex()-problem.getLastDayShiftIndex());
+					}
+				}
+				break;
+			//enkel laatste dag verwijderen
+			case 2:
+				/*
+				if (!isSteadyNightshift(endNightshift)){
+					horizon[endNightshift].setNachtshift(false);
+					//altijd vervangen door max overtime, kan later door andere swaps nog aangepast worden
+					horizon[endNightshift].setOvertime(problem.getLastOvertimeIndex()-problem.getLastDayShiftIndex());
+				}
+				break;
+				 */
+
+			//alle laatste dagen vervangen
+			case 3:
+				for (int i=startNightshift+problem.getMinimumConsecutiveNightShifts(); i<=endNightshift; i++){
+					if (!isSteadyNightshift(i)){
+						horizon[i].setNachtshift(false);
+						//altijd vervangen door max overtime, kan later door andere swaps nog aangepast worden
+						horizon[i].setOvertime(problem.getLastOvertimeIndex()-problem.getLastDayShiftIndex());
+					}
+				}
+				break;
+			case 4:
+				//alles vervangen
+				for (int i=startNightshift; i<=endNightshift; i++){
+					if(!isSteadyNightshift(i)) {
+						horizon[i].setNachtshift(false);
+						//altijd vervangen door max overtime, kan later door andere swaps nog aangepast worden
+						horizon[i].setOvertime(problem.getLastOvertimeIndex()-problem.getLastDayShiftIndex());
+					}
+				}
+				break;
+			//vervangen 1 dag in midden
+			case 5:
+				/*
+				//kies random dag vanuit midden
+				bound = consecutiveNightshifts - 2*problem.getMinimumConsecutiveNightShifts();
+				int randomInt = random.nextInt(bound);
+				int replaceIndex = startNightshift + problem.getMinimumConsecutiveNightShifts() + randomInt;
+				if (!isSteadyNightshift(replaceIndex)){
+					horizon[replaceIndex].setNachtshift(false);
+					//altijd vervangen door max overtime, kan later door andere swaps nog aangepast worden
+					horizon[replaceIndex].setOvertime(problem.getLastOvertimeIndex()-problem.getLastDayShiftIndex());
+				}
+				break;
+				 */
+			//vervangen alle dagen in midden
+			case 6:
+				//kies random dag vanuit midden
+				bound = consecutiveNightshifts - 2*problem.getMinimumConsecutiveNightShifts();
+				int replaceIndex = startNightshift + problem.getMinimumConsecutiveNightShifts();
+				for (int i=0; i<bound; i++){
+					if (!isSteadyNightshift(replaceIndex+i)){
+						horizon[replaceIndex+i].setNachtshift(false);
+						//altijd vervangen door max overtime, kan later door andere swaps nog aangepast worden
+						horizon[replaceIndex+i].setOvertime(problem.getLastOvertimeIndex()-problem.getLastDayShiftIndex());
+					}
+				}
+				break;
+		}
+	}
+
+	public void addMachineOrder() {
 		//System.out.println("addMachineOrder");
 		//create a random machineOrder with size == 1 & add it to the end.
-		//TODO: is het beter om hier direct meerdere blokken toe te voegen? hmmm...
-		randomInt1 = Math.abs(randomInt1);
-		randomInt2 = Math.abs(randomInt2);
-		int machine = randomInt2 % this.problem.amountOfMachines();
-		//System.out.println("Amount of machines: " + this.problem.amountOfMachines());
-		//System.out.println(randomInt2 % this.problem.amountOfMachines() + ", " + machine);
-		ProductionOrder po = new ProductionOrder(randomInt1 % this.problem.getItems().length, machine, 1);
-		this.orders.add(po);
+		//TODO: is het beter om hier direct meerdere blokken toe te voegen?
+
+		orders.add(new ProductionOrder(random.nextInt(problem.getItems().length), random.nextInt(problem.amountOfMachines()), random.nextInt(3)+1));
 	}
 	
-	public void incrementOrderCount(int randomInt) {
+	public void incrementOrderCount() {
 
 		//indien geen productionorders => vervangen door add
 		if (orders.isEmpty())
-			addMachineOrder(randomInt, new Random().nextInt());
+			addMachineOrder();
 
 		//voeg block toe aan random ProductionOrder
 		else
-			this.orders.get(randomInt % this.orders.size()).incrementAmountOfBlocks();
+			orders.get(random.nextInt(orders.size())).incrementAmountOfBlocks();
 	}
 	
-	public void decrementOrderCount(int randomInt) {
+	public void decrementOrderCount() {
 
 		//indien geen productionorders => vervangen door add
 		if (orders.isEmpty())
-			addMachineOrder(randomInt, new Random().nextInt());
+			addMachineOrder();
 
 		//neem block weg van random ProductionOrder
 		else {
-			this.orders.get(randomInt % this.orders.size()).decrementAmountOfBlocks();
-			if(this.orders.get(randomInt % this.orders.size()).getAmountOfBlocks() == 0) {
-				this.orders.remove(randomInt % this.orders.size());
+			int index = random.nextInt(orders.size());
+			orders.get(index).decrementAmountOfBlocks();
+			if(orders.get(index).getAmountOfBlocks() == 0) {
+				orders.remove(index);
 			}
 		}
 	}
 
-	public void swapOrders(int randomInt1, int randomInt2) {
+	public void swapOrders() {
 		//System.out.println("swapOrders");
 		//indien geen productionorders => vervangen door add
 		if (orders.isEmpty() || orders.size() == 1)
-			addMachineOrder(randomInt1, randomInt2);
+			addMachineOrder();
 
 		//swap indexes of 2 random orders
 		else{
 			//zelfde index => nieuw random getal
-			while (randomInt1 == randomInt2)
-				randomInt1 = new Random().nextInt();
+			int index1 = random.nextInt(orders.size());
+			int index2 = random.nextInt(orders.size());
 
-			Collections.swap(this.orders, randomInt1 % this.orders.size(), randomInt2 % this.orders.size());
+			while (index1 == index2)
+				index1 = random.nextInt(orders.size());
+
+			Collections.swap(this.orders, index1, index2);
 		}
 
 	}
 	
-	public void changeMachineForOrders(int randomInt1, int randomInt2) {
+	public void changeMachineForOrders() {
 		//System.out.println("changeMachineForOrders");
 		//indien geen productionorders zijn => vervangen door add
 		if (orders.isEmpty())
-			addMachineOrder(randomInt1, randomInt2);
+			addMachineOrder();
 
 		//change machineId of random order
 		else
-			this.orders.get(randomInt1 % this.orders.size()).setMachineId(randomInt2 % this.problem.amountOfMachines());
+			orders.get(random.nextInt(orders.size())).setMachineId(random.nextInt(problem.amountOfMachines()));
 	}
 	
-	public void changeItemForOrder(int randomInt1, int randomInt2) {
+	public void changeItemForOrder() {
 		//System.out.println("changeItemForOrders");
 		//indien geen productionorders zijn => vervangen door add
 		if (orders.isEmpty())
-			addMachineOrder(randomInt1, randomInt2);
+			addMachineOrder();
 
 		//change itemId of random order
 		else
-			this.orders.get(randomInt1 % this.orders.size()).setItemId(randomInt2 % this.problem.getItems().length);
+			orders.get(random.nextInt(orders.size())).setItemId(random.nextInt(problem.getItems().length));
 	}
 	
 	//wissel 2 requests van plaats in array
-	public void swapRequestOrder(int randomInt1, int randomInt2) {
+	public void swapRequestOrder() {
 		//System.out.println("swapRequestOrder");
-		int index1 = randomInt1%problem.getRequests().length;
-		int index2 = randomInt2%problem.getRequests().length;
-
 		//zelfde index => nieuw random getal
-		while (index1 == index2) {
-			index2 = Math.abs(new Random().nextInt()) % problem.getRequests().length;
-		}
+		int index1 = random.nextInt(problem.getRequests().length);
+		int index2 = random.nextInt(problem.getRequests().length);
+
+		while (index1 == index2)
+			index1 = random.nextInt(problem.getRequests().length);
 
 		Collections.swap(requestOrder, index1, index2);
 	}
