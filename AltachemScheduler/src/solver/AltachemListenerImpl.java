@@ -1,5 +1,7 @@
 package solver;
 
+import java.util.Locale;
+
 import solution.Solution;
 
 public class AltachemListenerImpl implements AltachemListener{
@@ -15,10 +17,10 @@ public class AltachemListenerImpl implements AltachemListener{
 
 	@Override
 	public void improved(Solution solution) {
-		synchronized (this) {
+		synchronized (System.out) {
 			if (solution.getCost() < bestSolutionCost) {
 				System.out.print("improved solution found: \n\t\tcost: ");
-				System.out.println(solution.getCost());
+				System.out.println(String.format(Locale.ENGLISH, "%.2f", solution.getCost()));
 				result = solution;
 				nextBestSolution = result;
 				bestSolutionCost = solution.getCost();

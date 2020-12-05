@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,21 +32,9 @@ public class MultiThreadedTimeGated {
 			System.exit(1);
 		}
 		
-		int timeLimitInMinutes = 1;
-		try {
-			timeLimitInMinutes = Integer.parseInt(args[3]);
-		} catch (NumberFormatException e) {
-			System.err.println("NumberFormatException caught when setting timer. Please enter an integer value.");
-			System.exit(1);
-		}
+		final int timeLimitInMinutes = Integer.parseInt(args[3]);
 		
-		int maxThreads = 1;
-		try {
-			maxThreads = Integer.parseInt(args[4]);
-		} catch (NumberFormatException e) {
-			System.err.println("NumberFormatException caught when setting maximum amount of threads. Please enter an integer value.");
-			System.exit(1);
-		}
+		final int maxThreads = Integer.parseInt(args[4]);
 
 		ExecutorService threadPool = Executors.newFixedThreadPool(maxThreads);
 		System.out.println("Creating solver with time-out=" + timeLimitInMinutes + " minutes & thread-count= "+maxThreads+"...");
@@ -71,19 +60,24 @@ public class MultiThreadedTimeGated {
 		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
-			public void run() {
-				System.out.println("Shutdown-hook: writing solution...");
+			public synchronized void run() {
                 threadPool.shutdownNow();
 				Solution solved = AltachemListenerImpl.getBestSolution();
+				System.out.println("Ending program...");
+				System.out.println("\tProgram executed " + ProblemThread.getThreadsCount() + " times given " + timeLimitInMinutes + " minutes and " + maxThreads + " threads.");
+				System.out.println("Solution report:");
+				System.out.println("\tOutput file: " + outputFilePath);
 				
 				if (solved != null) {
+					System.out.println("\tBest solution: " + String.format(Locale.ENGLISH, "%.2f", solved.getCost()));
 					solved.write(outputFilePath);
+					/*
 					try {
 						System.out.println(runCommand("java", "-jar", "src/examples/AspValidator.jar", "-i",
 								inputFilePath, "-s", outputFilePath));
 					} catch (IOException ioe) {
 						System.out.println("IOException when trying to validate result...");
-					} 
+					} */
 				} else {
 					System.err.println("No solution found. Please validate inputs and try again.");
 				}
@@ -92,8 +86,7 @@ public class MultiThreadedTimeGated {
 	}
 	
 	public static String runCommand(String... command) throws IOException {
-        ProcessBuilder pb = new ProcessBuilder(command).redirectErrorStream(true).directory(new File(System.getProperty("user.home") + "/git/AltachemSchedulerProposal/AltachemScheduler"));
-        System.out.println(pb.directory());
+        ProcessBuilder pb = new ProcessBuilder(command).redirectErrorStream(true).directory(null);
         Process process = pb.start();
         StringBuilder result = new StringBuilder(80);
         try (BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
@@ -105,7 +98,7 @@ public class MultiThreadedTimeGated {
             }
         }
         return result.toString();
-    }
+    }                                                                
 
 }
 
@@ -127,16 +120,17 @@ class ProblemThread implements Runnable {
 	@Override
 	public void run() {
 		try {
-			System.out.println("now running thread with id = " + this.id);
 			AltachemSolver solver = new AltachemSolver(listener);
 			Solution solved = solver.solve(problem);
 			if(solved.getCost() == 0) {
 				System.exit(0);
 			}
 		} finally {
-			System.out.println("thread with id "+ this.id +" exited, inserting new thread in the pool...");
 			exec.submit(new ProblemThread(problem, new AltachemListenerImpl(), exec));
 		}		
 	}
 	
+	public static int getThreadsCount() {
+		return ProblemThread.identifier;
+	}
 }
