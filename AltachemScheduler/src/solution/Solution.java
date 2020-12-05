@@ -540,46 +540,35 @@ public class Solution {
 	}
 	
 	//START SWAPS
-
 	public void executeRandomSwap() {
 
-		switch (random.nextInt(12)){
+		switch (random.nextInt(10)){
 			//basisswaps
 			case 0: swapParallelWork(); break;
 			case 1: swapNightShift(); break;
 			case 2: swapOvertime(); break;
-			case 3:
+			case 3: swapOrders(); break;
+			case 4: swapRequestOrder(); break;
+			case 5:
+				for (int i=0; i<random.nextInt(3)+1; i++)
+					incrementOrderCount();
+				break;
+			case 6:
+				for (int i=0; i<random.nextInt(3)+1; i++)
+					decrementOrderCount();
+				break;
+			case 7: changeMachineForOrders(); break;
+			case 8: changeItemForOrder(); break;
+			case 9:
 				for (int i=0; i<random.nextInt(3)+1; i++)
 					addMachineOrder();
 				break;
-			case 4:	incrementOrderCount(); break;
-			case 5: decrementOrderCount(); break;
-			case 6: swapOrders(); break;
-			case 7: swapRequestOrder(); break;
-			case 8: changeMachineForOrders(); break;
-			case 9: changeItemForOrder(); break;
 
-			//grotere swaps
-			case 10: combinedOrderSwap(); break;
-			case 11: combinedProductionSwap(); break;
+			//grotere kansen
 
 			default: break;
 		}
 		
-	}
-
-	public void combinedOrderSwap(){
-		for (int i=0; i<random.nextInt(4); i++)
-			swapOrders();
-		for (int i=0; i<random.nextInt(4); i++)
-			swapRequestOrder();
-	}
-
-	public void combinedProductionSwap(){
-		for (int i=0; i<random.nextInt(4); i++)
-			changeMachineForOrders();
-		for (int i=0; i<random.nextInt(4); i++)
-			changeItemForOrder();
 	}
 
 	public void swapParallelWork() {
@@ -858,7 +847,7 @@ public class Solution {
 
 		orders.add(new ProductionOrder(random.nextInt(problem.getItems().length), random.nextInt(problem.amountOfMachines()), random.nextInt(3)+1));
 	}
-
+	
 	public void incrementOrderCount() {
 
 		//indien geen productionorders => vervangen door add
@@ -931,17 +920,14 @@ public class Solution {
 	//wissel 2 requests van plaats in array
 	public void swapRequestOrder() {
 		//System.out.println("swapRequestOrder");
+		//zelfde index => nieuw random getal
+		int index1 = random.nextInt(problem.getRequests().length);
+		int index2 = random.nextInt(problem.getRequests().length);
 
-		if (problem.getRequests().length != 0 || problem.getRequests().length != 1){
-			//zelfde index => nieuw random getal
-			int index1 = random.nextInt(problem.getRequests().length);
-			int index2 = random.nextInt(problem.getRequests().length);
+		while (index1 == index2)
+			index1 = random.nextInt(problem.getRequests().length);
 
-			while (index1 == index2)
-				index1 = random.nextInt(problem.getRequests().length);
-
-			Collections.swap(requestOrder, index1, index2);
-		}
+		Collections.swap(requestOrder, index1, index2);
 	}
 	//END SWAPS
 	
