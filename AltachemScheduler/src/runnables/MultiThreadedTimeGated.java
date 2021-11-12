@@ -15,6 +15,7 @@ import solution.Solution;
 import solver.AltachemListener;
 import solver.AltachemListenerImpl;
 import solver.AltachemSolver;
+import thesis_logger.ThesisLogger;
 
 public class MultiThreadedTimeGated {
 	
@@ -114,7 +115,7 @@ class ProblemThread implements Runnable {
 		this.problem = problem;
 		this.listener = listener;
 		this.exec = exec;
-		this.id = identifier++;
+		this.id = ++identifier;
 	}
 
 	@Override
