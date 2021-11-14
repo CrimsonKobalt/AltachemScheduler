@@ -41,7 +41,7 @@ public class MultiThreadedTimeGated {
 		System.out.println("Creating solver with time-out=" + timeLimitInMinutes + " minutes & thread-count= "+maxThreads+"...");
 		
 		Problem problem = new Problem(inputFilePath);
-		
+
 		for(int i=0; i<maxThreads; i++) {
 			threadPool.submit(new ProblemThread(problem, new AltachemListenerImpl(), threadPool));
 		}
@@ -122,10 +122,13 @@ class ProblemThread implements Runnable {
 	public void run() {
 		try {
 			AltachemSolver solver = new AltachemSolver(listener);
+			ThesisLogger.createLogger("SCHC", this.id);
 			Solution solved = solver.solve(problem);
 			if(solved.getCost() == 0) {
 				System.exit(0);
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		} finally {
 			exec.submit(new ProblemThread(problem, new AltachemListenerImpl(), exec));
 		}		

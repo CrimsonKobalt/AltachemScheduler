@@ -136,6 +136,10 @@ public class AltachemSolver {
 		
 		//finished ----------------------------------------------
 		
+		if(!ThesisLogger.printJSONFile()) {
+			System.out.println("File could not be written.");
+			System.exit(-1);
+		}
 		return bestSolution;
 	}
 }
