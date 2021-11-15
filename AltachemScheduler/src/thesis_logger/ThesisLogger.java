@@ -12,6 +12,8 @@ public class ThesisLogger {
 	
 	private static String MHName;
 	private static int runId;
+	private static int total_steps;
+	
 	private static List<String> MHparam_names;
 	private static List<Integer> MHparam_vals;
 	
@@ -35,6 +37,7 @@ public class ThesisLogger {
 	public static void createLogger(String name, int id){	
 		MHName = name;
 		runId = id;
+		total_steps = 0;
 		wasLogged = false;
 		MHparam_names = new ArrayList<>();
 		MHparam_vals = new ArrayList<>();
@@ -55,6 +58,10 @@ public class ThesisLogger {
 		current_thresholds = new ArrayList<>();
 		
 		jsonrep = null;
+	}
+	
+	public static void countSteps() {
+		total_steps = objVals_curr.size();
 	}
 	
 	public static void logOperation(String opname, double optiming, int...params) {
@@ -112,7 +119,7 @@ public class ThesisLogger {
 		StringBuilder sb = new StringBuilder("{");
 		
 		//Metaheuristic Name
-		sb.append("\n\t\"metaheuristic-name\": " + MHName + ",");
+		sb.append("\n\t\"metaheuristic-name\": \"" + MHName + "\",");
 		
 		//Metaheuristic params
 		if(!MHparam_names.isEmpty()) {
@@ -127,6 +134,9 @@ public class ThesisLogger {
 		
 		//run id
 		sb.append("\n\t\"run-id\": "+ runId + ",");
+		
+		//total-steps
+		sb.append("\n\t\"total-steps\": "+ total_steps + ",");
 		
 		//current objvals
 		sb.append("\n\t\"current-objvals\": [");
@@ -192,7 +202,7 @@ public class ThesisLogger {
 		//operator-names
 		sb.append("\n\t\"operator-names\": [");
 		for(String val : operator_names) {
-			sb.append("\n\t\t" + val + ",");
+			sb.append("\n\t\t\"" + val + "\",");
 		}
 		//remove last ","
 		sb.setLength(sb.length() - 1);

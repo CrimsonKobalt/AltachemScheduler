@@ -32,22 +32,22 @@ public class AltachemSolver {
 		
 		//initial solution --------------------------------------
 		
-		long step_start = System.currentTimeMillis();
+		long step_start = System.nanoTime();
 		solution = Solution.CreateInitialSolution(problem);
-		long eval_start = System.currentTimeMillis();
+		long eval_start = System.nanoTime();
 		try {
 			solution.evaluate();
 		} catch (OverStockException e1) {
 			System.err.println("initial solution cannot be constructed due to stock-overflow.");
 			return null;
 		}
-		long time_eval = System.currentTimeMillis() - eval_start;
+		long time_eval = System.nanoTime() - eval_start;
 		ThesisLogger.logEvaluation(solution.getCost(), time_eval);
 		bestSolution = solution;
 		carryOver = solution;
 		listener.improved(bestSolution);
 		ThesisLogger.logAcceptance(solution.getCost(), solution.getCost(), true, true, true);
-		long step_time = System.currentTimeMillis() - step_start;
+		long step_time = System.nanoTime() - step_start;
 		ThesisLogger.logStepTime(step_time);
 		
 		// [meta] init ------------------------------------------
@@ -61,7 +61,7 @@ public class AltachemSolver {
 		while(true) {
 			
 			//double currentCost = bestSolution.getTempCost();
-			step_start = System.currentTimeMillis();
+			step_start = System.nanoTime();
 			double currentCost = bestSolution.getCost();
 			
 			//copy the old solution
@@ -71,16 +71,22 @@ public class AltachemSolver {
 			solution.executeRandomSwap();
 			
 			//compile and recalculate
-			eval_start = System.currentTimeMillis();
+			eval_start = System.nanoTime();
 			try {
 				solution.constructSchedule();
 			} catch (ScheduleException se) {
 				idle++;
-				time_eval = System.currentTimeMillis() - eval_start;
+				time_eval = System.nanoTime() - eval_start;
 				ThesisLogger.logEvaluation(-1, time_eval);
 				ThesisLogger.logAcceptance(bestSolution.getCost(), bound, false, false, false);
-				step_time = System.currentTimeMillis() - step_start;
+				step_time = System.nanoTime() - step_start;
 				ThesisLogger.logStepTime(step_time);
+				
+				count++;
+				if(count % L == 0) {
+					bound = carryOver.getCost();
+				}
+				
 				continue;
 			}
 			
@@ -88,17 +94,24 @@ public class AltachemSolver {
 				solution.evaluate();
 			} catch (OverStockException e) {
 				idle++;
-				time_eval = System.currentTimeMillis() - eval_start;
+				time_eval = System.nanoTime() - eval_start;
 				ThesisLogger.logEvaluation(-1, time_eval);
 				ThesisLogger.logAcceptance(bestSolution.getCost(), bound, false, false, false);
-				step_time = System.currentTimeMillis() - step_start;
+				step_time = System.nanoTime() - step_start;
 				ThesisLogger.logStepTime(step_time);
+				
+				count++;
+				if(count % L == 0) {
+					bound = carryOver.getCost();
+				}
+				
 				continue;
 			}
-			time_eval = System.currentTimeMillis() - eval_start;
+			time_eval = System.nanoTime() - eval_start;
 			
 			//double newCost = solution.getTempCost();
 			double newCost = solution.getCost();
+			ThesisLogger.logEvaluation(newCost, time_eval);
 			
 			// [meta] accept? -----------------------------------
 			boolean wasAccepted = false;
@@ -106,7 +119,7 @@ public class AltachemSolver {
 			if(newCost <= currentCost || newCost < bound) {
 				carryOver = solution;
 				wasAccepted = true;
-				if(solution.getCost() < bestSolution.getCost()) {
+				if(newCost < bestSolution.getCost()) {
 					idle = 0;
 					bestSolution = solution;
 					listener.improved(bestSolution);
@@ -118,8 +131,7 @@ public class AltachemSolver {
 			}
 			
 			ThesisLogger.logAcceptance(bestSolution.getCost(), bound, wasAccepted, wasImproving, true);
-			step_time = System.currentTimeMillis() - step_start;
-			ThesisLogger.logStepTime(step_time);
+			
 			// [meta] update ------------------------------------
 			
 			count++;
@@ -127,15 +139,23 @@ public class AltachemSolver {
 				bound = carryOver.getCost();
 			}
 			
+			step_time = System.nanoTime() - step_start;
+			ThesisLogger.logStepTime(step_time);
+			
 			//stop? ---------------------------------------------
 			
 			if(idle >= MAX_IDLE) {
+				break;
+			}
+			
+			if(solution.getCost() == 0) {
 				break;
 			}
 		}
 		
 		//finished ----------------------------------------------
 		
+		ThesisLogger.countSteps();
 		if(!ThesisLogger.printJSONFile()) {
 			System.out.println("File could not be written.");
 			System.exit(-1);

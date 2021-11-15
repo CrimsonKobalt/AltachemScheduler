@@ -542,7 +542,7 @@ public class Solution {
 	
 	//START SWAPS
 	public void executeRandomSwap() {
-
+		
 		switch (random.nextInt(10)){
 			//basisswaps
 			case 0: swapParallelWork();	break;
@@ -550,22 +550,11 @@ public class Solution {
 			case 2: swapOvertime(); break;
 			case 3: swapOrders(); break;
 			case 4: swapRequestOrder(); break;
-			case 5:
-				for (int i=0; i<random.nextInt(3)+1; i++)
-					incrementOrderCount();
-				break;
-			case 6:
-				for (int i=0; i<random.nextInt(3)+1; i++)
-					decrementOrderCount();
-				break;
+			case 5: incrementOrderCount(); break;
+			case 6: decrementOrderCount(); break;
 			case 7: changeMachineForOrders(); break;
 			case 8: changeItemForOrder(); break;
-			case 9:
-				for (int i=0; i<random.nextInt(3)+1; i++)
-					addMachineOrder();
-				break;
-
-			//grotere kansen
+			case 9: addMachineOrder(); break;
 
 			default: break;
 		}
@@ -574,10 +563,10 @@ public class Solution {
 
 	public void swapParallelWork() {
 		//System.out.println("swapParallelWork");
-		long starttime = System.currentTimeMillis();
+		long starttime = System.nanoTime();
 		int param = random.nextInt(horizon.length);
 		this.horizon[param].setParallelwerk(!this.horizon[param].parallelwerk);
-		long timepassed = System.currentTimeMillis() - starttime;
+		long timepassed = System.nanoTime() - starttime;
 		
 		ThesisLogger.logOperation("swapParallelWork", timepassed, param);
 	}
@@ -585,10 +574,11 @@ public class Solution {
 	public void swapOvertime() {
 		//System.out.println("swapOvertime");
 
-		long starttime = System.currentTimeMillis();
 		int index = random.nextInt(horizon.length);
+		int rand = random.nextInt(3);
 		if (!horizon[index].isNachtshift()){
-			switch (random.nextInt(3)){
+			long starttime = System.nanoTime();
+			switch (rand){
 				//select random overtime
 				case 0:
 					this.horizon[index].setOvertime(random.nextInt(problem.getLastOvertimeIndex()-problem.getLastDayShiftIndex()));
@@ -604,19 +594,18 @@ public class Solution {
 						horizon[index].setOvertime(horizon[index].getOvertime()-1);
 					break;
 			}
+			long timepassed = System.nanoTime() - starttime;
+			ThesisLogger.logOperation("swapOvertime", timepassed, index, rand);
 		}
 		// wordt meer opgeroepen indien er al veel night shifts zijn
 		else
 			replaceNightshiftWithOvertime();
-		
-		long timepassed = System.currentTimeMillis() - starttime;
-		ThesisLogger.logOperation("swapOvertime", timepassed, index);
 	}
 	
 	public void swapNightShift() {
 		//System.out.println("swapNightShift");
 		
-		long starttime = System.currentTimeMillis();
+		long starttime = System.nanoTime();
 		int index = random.nextInt(horizon.length);
 		//indien random gekozen dag al een night shift is
 		if (horizon[index].isNachtshift()){
@@ -721,7 +710,7 @@ public class Solution {
 		}
 
 		
-		long timepassed = System.currentTimeMillis() - starttime;
+		long timepassed = System.nanoTime() - starttime;
 		ThesisLogger.logOperation("swapNightShift", timepassed, index);
 	}
 
@@ -729,7 +718,7 @@ public class Solution {
 	public void replaceNightshiftWithOvertime(){
 		//System.out.println("replaceNightShiftWithOvertime");
 
-		long starttime = System.currentTimeMillis();
+		long starttime = System.nanoTime();
 		int index = random.nextInt(horizon.length);
 
 		//zoek random night shift
@@ -852,7 +841,7 @@ public class Solution {
 				break;
 		}
 		
-		long timepassed = System.currentTimeMillis() - starttime;
+		long timepassed = System.nanoTime() - starttime;
 		ThesisLogger.logOperation("replaceNightShiftWithOvertime", timepassed, index);
 	}
 
@@ -860,45 +849,49 @@ public class Solution {
 		//System.out.println("addMachineOrder");
 		//create a random machineOrder with size == 1 & add it to the end.
 		//TODO: is het beter om hier direct meerdere blokken toe te voegen?
-		long starttime = System.currentTimeMillis();
+		long starttime = System.nanoTime();
 		int itemid = random.nextInt(problem.getItems().length);
 		int machineid = random.nextInt(problem.amountOfMachines());
 		int amountOfBlocks = random.nextInt(3)+1;
 		orders.add(new ProductionOrder(itemid, machineid, amountOfBlocks));
-		long timepassed = System.currentTimeMillis() - starttime;
+		long timepassed = System.nanoTime() - starttime;
 		ThesisLogger.logOperation("addMachineOrder", timepassed, itemid, machineid, amountOfBlocks);
 	}
 	
 	public void incrementOrderCount() {
 		//indien geen productionorders => vervangen door add
-		if (orders.isEmpty())
+		if (orders.isEmpty()) {
 			addMachineOrder();
-
+		}
 		//voeg block toe aan random ProductionOrder
 		else {
-			long starttime = System.currentTimeMillis();
+			long starttime = System.nanoTime();
 			int index = random.nextInt(orders.size());
-			orders.get(index).incrementAmountOfBlocks();
-			long timepassed = System.currentTimeMillis() - starttime;
-			ThesisLogger.logOperation("incrementOrderCount", timepassed, index);
+			int amount = random.nextInt(3);
+			for(int i=0; i<amount; i++) {
+				orders.get(index).incrementAmountOfBlocks();
+			}
+			long timepassed = System.nanoTime() - starttime;
+			ThesisLogger.logOperation("incrementOrderCount", timepassed, index, amount);
 		}
 	}
 	
 	public void decrementOrderCount() {
 
 		//indien geen productionorders => vervangen door add
-		if (orders.isEmpty())
+		if (orders.isEmpty()) {
 			addMachineOrder();
-
+		}
 		//neem block weg van random ProductionOrder
 		else {
-			long starttime = System.currentTimeMillis();
+			long starttime = System.nanoTime();
 			int index = random.nextInt(orders.size());
+			int amount = random.nextInt(3);
 			orders.get(index).decrementAmountOfBlocks();
-			if(orders.get(index).getAmountOfBlocks() == 0) {
+			if(orders.get(index).getAmountOfBlocks() <= 0) {
 				orders.remove(index);
 			}
-			long timepassed = System.currentTimeMillis() - starttime;
+			long timepassed = System.nanoTime() - starttime;
 			ThesisLogger.logOperation("decrementOrderCount", timepassed, index);
 		}
 	}
@@ -906,13 +899,13 @@ public class Solution {
 	public void swapOrders() {
 		//System.out.println("swapOrders");
 		//indien geen productionorders => vervangen door add
-		if (orders.isEmpty() || orders.size() == 1)
+		if (orders.isEmpty() || orders.size() == 1) {
 			addMachineOrder();
-
+		}
 		//swap indexes of 2 random orders
 		else{
 			//zelfde index => nieuw random getal
-			long starttime = System.currentTimeMillis();
+			long starttime = System.nanoTime();
 			int index1 = random.nextInt(orders.size());
 			int index2 = random.nextInt(orders.size());
 
@@ -920,7 +913,7 @@ public class Solution {
 				index1 = random.nextInt(orders.size());
 
 			Collections.swap(this.orders, index1, index2);
-			long timepassed = System.currentTimeMillis() - starttime;
+			long timepassed = System.nanoTime() - starttime;
 			ThesisLogger.logOperation("swapOrders", timepassed, index1, index2);
 		}
 
@@ -929,16 +922,16 @@ public class Solution {
 	public void changeMachineForOrders() {
 		//System.out.println("changeMachineForOrders");
 		//indien geen productionorders zijn => vervangen door add
-		if (orders.isEmpty())
+		if (orders.isEmpty()) {
 			addMachineOrder();
-
+		}
 		//change machineId of random order
 		else {
-			long starttime = System.currentTimeMillis();
+			long starttime = System.nanoTime();
 			int orderindex = random.nextInt(orders.size());
 			int machineid = random.nextInt(problem.amountOfMachines());
 			orders.get(orderindex).setMachineId(machineid);
-			long timepassed = System.currentTimeMillis() - starttime;
+			long timepassed = System.nanoTime() - starttime;
 			ThesisLogger.logOperation("changeMachineForOrder", timepassed, orderindex, machineid);
 		}	
 	}
@@ -951,11 +944,11 @@ public class Solution {
 
 		//change itemId of random order
 		else {
-			long starttime = System.currentTimeMillis();
+			long starttime = System.nanoTime();
 			int orderid = random.nextInt(orders.size());
 			int itemid = random.nextInt(problem.getItems().length);
 			orders.get(orderid).setItemId(itemid);
-			long timepassed = System.currentTimeMillis() - starttime;
+			long timepassed = System.nanoTime() - starttime;
 			ThesisLogger.logOperation("changeItemForOrder", timepassed, orderid, itemid);
 		}
 	}
@@ -964,7 +957,7 @@ public class Solution {
 	public void swapRequestOrder() {
 		//System.out.println("swapRequestOrder");
 		//zelfde index => nieuw random getal
-		long starttime = System.currentTimeMillis();
+		long starttime = System.nanoTime();
 		int index1 = random.nextInt(problem.getRequests().length);
 		int index2 = random.nextInt(problem.getRequests().length);
 
@@ -972,7 +965,7 @@ public class Solution {
 			index1 = random.nextInt(problem.getRequests().length);
 
 		Collections.swap(requestOrder, index1, index2);
-		long timepassed = System.currentTimeMillis() - starttime;
+		long timepassed = System.nanoTime() - starttime;
 		ThesisLogger.logOperation("swapRequestOrder", timepassed, index1, index2);
 	}
 	//END SWAPS
