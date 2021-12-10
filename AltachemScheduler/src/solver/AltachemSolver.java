@@ -32,23 +32,16 @@ public class AltachemSolver {
 		
 		//initial solution --------------------------------------
 		
-		long step_start = System.nanoTime();
 		solution = Solution.CreateInitialSolution(problem);
-		long eval_start = System.nanoTime();
 		try {
 			solution.evaluate();
 		} catch (OverStockException e1) {
 			System.err.println("initial solution cannot be constructed due to stock-overflow.");
 			return null;
 		}
-		long time_eval = System.nanoTime() - eval_start;
-		ThesisLogger.logEvaluation(solution.getCost(), time_eval);
 		bestSolution = solution;
 		carryOver = solution;
 		listener.improved(bestSolution);
-		ThesisLogger.logAcceptance(solution.getCost(), solution.getCost(), true, true, true);
-		long step_time = System.nanoTime() - step_start;
-		ThesisLogger.logStepTime(step_time);
 		
 		// [meta] init ------------------------------------------
 		
@@ -61,7 +54,7 @@ public class AltachemSolver {
 		while(true) {
 			
 			//double currentCost = bestSolution.getTempCost();
-			step_start = System.nanoTime();
+			long step_start = System.nanoTime();
 			double currentCost = bestSolution.getCost();
 			
 			//copy the old solution
@@ -71,15 +64,15 @@ public class AltachemSolver {
 			solution.executeRandomSwap();
 			
 			//compile and recalculate
-			eval_start = System.nanoTime();
+			long eval_start = System.nanoTime();
 			try {
 				solution.constructSchedule();
 			} catch (ScheduleException se) {
 				idle++;
-				time_eval = System.nanoTime() - eval_start;
+				long time_eval = System.nanoTime() - eval_start;
 				ThesisLogger.logEvaluation(-1, time_eval);
 				ThesisLogger.logAcceptance(bestSolution.getCost(), bound, false, false, false);
-				step_time = System.nanoTime() - step_start;
+				long step_time = System.nanoTime() - step_start;
 				ThesisLogger.logStepTime(step_time);
 				
 				count++;
@@ -94,10 +87,10 @@ public class AltachemSolver {
 				solution.evaluate();
 			} catch (OverStockException e) {
 				idle++;
-				time_eval = System.nanoTime() - eval_start;
+				long time_eval = System.nanoTime() - eval_start;
 				ThesisLogger.logEvaluation(-1, time_eval);
 				ThesisLogger.logAcceptance(bestSolution.getCost(), bound, false, false, false);
-				step_time = System.nanoTime() - step_start;
+				long step_time = System.nanoTime() - step_start;
 				ThesisLogger.logStepTime(step_time);
 				
 				count++;
@@ -107,7 +100,7 @@ public class AltachemSolver {
 				
 				continue;
 			}
-			time_eval = System.nanoTime() - eval_start;
+			long time_eval = System.nanoTime() - eval_start;
 			
 			//double newCost = solution.getTempCost();
 			double newCost = solution.getCost();
@@ -139,7 +132,7 @@ public class AltachemSolver {
 				bound = carryOver.getCost();
 			}
 			
-			step_time = System.nanoTime() - step_start;
+			long step_time = System.nanoTime() - step_start;
 			ThesisLogger.logStepTime(step_time);
 			
 			//stop? ---------------------------------------------
@@ -156,6 +149,9 @@ public class AltachemSolver {
 		//finished ----------------------------------------------
 		
 		ThesisLogger.countSteps();
+		if(!ThesisLogger.validatelogs()) {
+			System.exit(-1);
+		}
 		if(!ThesisLogger.printJSONFile()) {
 			System.out.println("File could not be written.");
 			System.exit(-1);

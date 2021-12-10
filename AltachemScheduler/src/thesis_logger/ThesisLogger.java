@@ -92,12 +92,21 @@ public class ThesisLogger {
 		total_step_timings.add(steptime);
 	}
 	
-	public static boolean printJSONFile(String name) {
+	public static boolean printJSONFile(String name, Boolean test) {
 		File dir = new File("logs");
 		if(!dir.isDirectory()) {
 			dir.mkdir();
 		}
-		File file = new File("logs\\" + name);
+		File file;
+		if(test) {
+			File dir2 = new File("logs\\tests");
+			if(!dir2.isDirectory()) {
+				dir2.mkdir();
+			}
+			file = new File("logs\\tests\\" + name);
+		} else {
+			file = new File("logs\\" + name);
+		}
 		System.out.println("printing file to " + file.getAbsolutePath());
 		try (BufferedWriter wr = new BufferedWriter(new FileWriter(file))) {
 			if(jsonrep == null) {
@@ -112,8 +121,66 @@ public class ThesisLogger {
 	}
 	
 	public static boolean printJSONFile() {
-		return printJSONFile(MHName + "_" + runId + ".json");
+		return printJSONFile(MHName + "_" + runId + ".json", true);
 	}
+	
+	public static boolean validatelogs() {
+		boolean result = true;
+		//mhparams & entries should be same size
+		if( !(MHparam_names.size()==MHparam_vals.size()) ) {
+			System.out.println("no 1-1 mapping MHparam_names - MHparam_values");
+			result = false;
+		}
+		//#entries should be of equal size -- load objvals_curr into iters
+		int iters = objVals_curr.size();
+		
+		if(objVals_best.size() != iters) {
+			System.out.println("Error with objVals_best size");
+			result = false;
+		}
+		
+		if(objVals_info.size() != iters) {
+			System.out.println("Error with objVals_info size");
+			result = false;
+		}
+		
+		if(operator_timings.size() != iters) {
+			System.out.println("Error with operator_timings size");
+			result = false;
+		}
+		
+		if(evaluation_timings.size() != iters) {
+			System.out.println("Error with evaluation_timings size");
+			System.out.println("Expected size: " + iters);
+			System.out.println("operator_timings size: " + operator_timings.size());
+			result = false;
+		}
+		
+		if(total_step_timings.size() != iters) {
+			System.out.println("Error with total_step_timings size");
+			result = false;
+		}
+		
+		if(operator_names.size() != iters) {
+			System.out.println("Error with operator_names size");
+			System.out.println("Expected size: " + iters);
+			System.out.println("operator_names size: " + operator_names.size());
+			result = false;
+		}
+		
+		if(operator_params.size() != iters) {
+			System.out.println("Error with operator_params size");
+			result = false;
+		}
+		
+		if(current_thresholds.size() != iters) {
+			System.out.println("Error with current_thresholds size");
+			result = false;
+		}
+		
+		return result;
+	}
+
 	
 	public static String getJSONString() {
 		StringBuilder sb = new StringBuilder("{");
